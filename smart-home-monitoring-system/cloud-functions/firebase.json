@@ -1,0 +1,18 @@
+{
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "runtime": "nodejs20",
+      "ignore": ["node_modules", ".git"]
+    }
+  ],
+  "database": {
+    "rules": "database.rules.json"
+  },
+  "emulators": {
+    "functions": { "port": 5001 },
+    "database": { "port": 9000 },
+    "ui": { "enabled": true }
+  }
+}

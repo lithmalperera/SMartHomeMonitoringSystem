@@ -1,0 +1,38 @@
+# ---- macOS ----
+.DS_Store
+
+# ---- Android / Gradle ----
+*.iml
+.gradle/
+local.properties
+.idea/
+build/
+*/build/
+.cxx/
+captures/
+.externalNativeBuild/
+.kotlin/
+
+# ---- Android keystores (never commit real release keys) ----
+*.keystore
+!debug.keystore
+
+# ---- Node / Cloud Functions ----
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ---- Firebase ----
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+database-debug.log
+serviceAccount*.json
+
+# ---- Environment / secrets ----
+.env
+.env.local
+
+# Note: google-services.json IS committed intentionally (coursework, private repo).
