@@ -1,0 +1,138 @@
+{
+  "homes": {
+    "home_001": {
+      "meta": {
+        "name": "My Smart Home",
+        "timezone": "Asia/Colombo"
+      },
+
+      "floors": {
+        "floor_ground": { "name": "Ground Floor", "order": 0, "gridColumns": 4, "gridRows": 4 },
+        "floor_first":  { "name": "First Floor",  "order": 1, "gridColumns": 4, "gridRows": 4 }
+      },
+
+      "devices": {
+        "dev_light_living": {
+          "name": "Living Room Light",
+          "type": "LIGHT",
+          "floorId": "floor_ground",
+          "room": "Living Room",
+          "position": { "x": 0, "y": 0 },
+          "state": {
+            "isOn": false,
+            "online": true,
+            "error": false,
+            "lastOnAt": 0,
+            "lastChangedBy": "android"
+          },
+          "config": { "wattage": 12, "maxActiveMinutes": 0 }
+        },
+
+        "dev_light_garden": {
+          "name": "Garden Light",
+          "type": "LIGHT",
+          "floorId": "floor_ground",
+          "room": "Garden",
+          "position": { "x": 3, "y": 3 },
+          "state": {
+            "isOn": false,
+            "online": true,
+            "error": false,
+            "lastOnAt": 0,
+            "lastChangedBy": "function"
+          },
+          "config": { "wattage": 15, "maxActiveMinutes": 0 }
+        },
+
+        "dev_outlet_tv": {
+          "name": "TV Outlet",
+          "type": "OUTLET",
+          "floorId": "floor_ground",
+          "room": "Living Room",
+          "position": { "x": 1, "y": 0 },
+          "state": {
+            "isOn": true,
+            "online": true,
+            "error": false,
+            "lastOnAt": 1753104000000,
+            "lastChangedBy": "simulator"
+          },
+          "config": { "wattage": 120, "maxActiveMinutes": 0 }
+        },
+
+        "dev_iron_kitchen": {
+          "name": "Iron",
+          "type": "IRON",
+          "floorId": "floor_ground",
+          "room": "Kitchen",
+          "position": { "x": 0, "y": 1 },
+          "state": {
+            "isOn": false,
+            "online": true,
+            "error": false,
+            "lastOnAt": 0,
+            "lastChangedBy": "android"
+          },
+          "config": { "maxActiveMinutes": 15, "wattage": 1000 }
+        },
+
+        "dev_panel_hall": {
+          "name": "Hall Switch Panel",
+          "type": "SWITCH_PANEL",
+          "floorId": "floor_ground",
+          "room": "Hall",
+          "position": { "x": 2, "y": 0 },
+          "state": {
+            "switches": { "s1": true, "s2": false, "s3": true },
+            "online": true,
+            "error": false,
+            "lastChangedBy": "simulator"
+          },
+          "config": { "wattage": 0, "maxActiveMinutes": 0 }
+        },
+
+        "dev_cam_porch": {
+          "name": "Porch Camera",
+          "type": "CAMERA",
+          "floorId": "floor_ground",
+          "room": "Porch",
+          "position": { "x": 3, "y": 0 },
+          "state": {
+            "online": true,
+            "error": false,
+            "streamUrl": "https://demo.smarthome.local/stream/porch",
+            "snapshotUrl": "https://picsum.photos/seed/porch/640/360",
+            "lastChangedBy": "simulator"
+          },
+          "config": { "wattage": 5, "maxActiveMinutes": 0 }
+        }
+      },
+
+      "schedules": {
+        "sch_light_garden": {
+          "deviceId": "dev_light_garden",
+          "onTime": "18:00",
+          "offTime": "06:00",
+          "enabled": true,
+          "lastRunKey": ""
+        }
+      },
+
+      "usage": {
+        "dev_iron_kitchen": {
+          "2026-07-20": { "activeMinutes": 25, "sessions": 2, "energyWh": 416.7 }
+        },
+        "dev_light_living": {
+          "2026-07-20": { "activeMinutes": 180, "sessions": 3, "energyWh": 36.0 }
+        }
+      }
+    }
+  },
+
+  "users": {
+    "anonUid_example": {
+      "homeId": "home_001",
+      "createdAt": 1753000000000
+    }
+  }
+}
