@@ -1,53 +1,52 @@
-# Hardware Simulator (Web)
+# Smart Home Simulator
 
-A static web app that plays the role of the **physical house**: it renders every device as
-an interactive card, listens to Firebase in real time, and writes state changes back — so
-the Android app sees the "hardware" respond instantly. No build step, no framework.
+Build a responsive web-based "Hardware Simulator Dashboard" for an IoT smart home system, using React + Tailwind CSS. This is an admin/simulator tool (not the end-user mobile app) that represents physical smart home devices and syncs with a backend database in real time.
 
-> Design details: `../documentation/architecture.md` §11. Data contract:
-> `../documentation/database-schema.md` §2 and §6.
+Layout: Sidebar with list of floors (+ "Add Floor" button). Main panel shows the selected floor's grid layout with an uploaded/placeholder floor plan image and a grid overlay where devices are placed as icons/tiles.
 
-## Planned structure
+Add Floor modal: name field, floor plan image upload/URL, grid rows/cols input.
 
+Add Device modal: device type selector (Outlet, Multi-Switch Unit, Iron/Hazard Device, Scheduled Light, Security Camera) that dynamically shows relevant fields:
+
+Outlet: name only
+
+Multi-Switch: name + number of gangs (2/3/5), auto-generates individually toggleable sub-switches
+
+Iron/Hazard: name + max_on_duration (minutes)
+
+Scheduled Light: name + start/end schedule time
+
+Camera: name + mock image URL / mock stream URI
+
+Device tile on grid: shows icon based on type, name, and a colored status badge (green=ON, gray=OFF, red=ERROR, black/striped=DISCONNECTED). Clicking toggles state (for outlets/switches/lights) or opens detail view (for cameras/irons).
+
+Iron/hazard device detail: live countdown timer while ON, progress bar toward max_on_duration, auto-flips to OFF with a toast/alert when duration is exceeded.
+
+Camera detail: shows a mock snapshot image in a modal with a "refresh snapshot" button.
+
+Bottom panel: live scrolling event log (timestamped state changes, faults, auto-cutoffs), and a top status bar showing backend connection state and aggregate counts of devices by status.
+
+Style: clean, technical/dashboard aesthetic (dark sidebar, card-based grid, subtle animations on state change), distinct color coding per status, mobile-responsive but optimized for desktop/tablet use.
+
+Use mock/local state for now, structured so device state updates can later be wired to real-time database listeners (e.g., Firebase/Supabase onSnapshot).
+
+This project was built with [Lovable](https://lovable.dev).
+
+## Build with Lovable
+
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/8b959fd9-5805-4fb3-a1cf-1d3c6e44b93d).
+
+- **Ship faster**: describe what you want to build and Lovable handles the code.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+
+## Development
+
+Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+
+```sh
+git clone <this-repository-url>
+cd <repository-name>
+npm i
+npm run dev
 ```
-hardware-simulator/
-├── index.html                  # floor tabs + device grid; loads js/app.js as an ES module
-├── css/main.css                # card grid + status colors
-├── js/
-│   ├── config/firebase-config.js   # Firebase web config + HOME_ID constant
-│   ├── services/firebase-service.js# ONLY Firebase-importing file:
-│   │                               #   anonymous sign-in, onValue listeners, update() writes,
-│   │                               #   presence (.info/connected + onDisconnect())
-│   ├── devices/                # base-device.js + light / outlet / switch-panel / iron / camera
-│   ├── ui/floor-view.js        # group devices by floor, render grid
-│   └── app.js                  # boot: auth → subscribe → render → wire events
-└── assets/                     # icons / placeholder images
-```
-
-## Setup (when implementation starts — Week 1–2)
-
-1. Firebase console → Project settings → *Your apps* → add a **Web app**, copy the
-   `firebaseConfig` object into `js/config/firebase-config.js`.
-2. Set `HOME_ID = "home_001"` in the same file (must match the Android app).
-3. Firebase Web SDK is imported from the CDN (`https://www.gstatic.com/firebasejs/...`) —
-   no npm, no bundler.
-
-## Run
-
-Any static file server from this folder, e.g.:
-
-```bash
-npx serve .            # or: python3 -m http.server 8080
-```
-
-(Opening `index.html` via `file://` will NOT work — ES modules require HTTP.)
-
-## Behaviour contract
-
-- **Mirror:** one `onValue` listener re-renders cards on every DB change (app → simulator).
-- **Actuate:** clicking a card writes `state` via `update()` with
-  `lastChangedBy: "simulator"` (simulator → app).
-- **Presence:** on connect, sets `state.online = true` and registers
-  `onDisconnect()` → `online = false` (drives the app's `DISCONNECTED` status).
-- **Fault button:** toggles `state.error` (drives the `ERROR` status).
-- **Iron countdown** is cosmetic; real enforcement is the `safetyMonitor` Cloud Function.

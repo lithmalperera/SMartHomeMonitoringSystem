@@ -1,6 +1,6 @@
 package com.smarthome.monitor.data.model
 
-enum class DeviceType { OUTLET, SWITCH_PANEL, IRON, LIGHT, CAMERA }
+enum class DeviceType { OUTLET, SWITCH_PANEL, IRON, LIGHT, CAMERA, LOCK, THERMOSTAT }
 
 data class Device(
     val id: String = "",
@@ -22,6 +22,7 @@ data class DeviceState(
     val error: Boolean = false,
     val streamUrl: String = "",
     val snapshotUrl: String = "",
+    val targetTemperature: Int = 24,
     val lastOnAt: Long = 0L,
     val lastChangedBy: String = ""
 )

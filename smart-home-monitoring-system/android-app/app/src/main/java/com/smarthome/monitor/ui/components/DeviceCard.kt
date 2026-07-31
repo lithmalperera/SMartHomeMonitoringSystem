@@ -44,4 +44,6 @@ private fun deviceTypeIcon(type: com.smarthome.monitor.data.model.DeviceType): S
     com.smarthome.monitor.data.model.DeviceType.IRON -> "\uD83E\uDDF4"
     com.smarthome.monitor.data.model.DeviceType.SWITCH_PANEL -> "\uD83D\uDD0B"
     com.smarthome.monitor.data.model.DeviceType.CAMERA -> "\uD83D\uDCF7"
+    com.smarthome.monitor.data.model.DeviceType.LOCK -> "\uD83D\uDD12"
+    com.smarthome.monitor.data.model.DeviceType.THERMOSTAT -> "\uD83C\uDF21\uFE0F"
 }
