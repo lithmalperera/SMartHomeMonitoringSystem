@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Lumina Home - Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#eff4ff",
+                    "outline-variant": "#c3c6d7",
+                    "error": "#ba1a1a",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "on-primary-fixed": "#00174b",
+                    "tertiary-container": "#bc4800",
+                    "secondary-fixed-dim": "#c4c7c9",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed": "#360f00",
+                    "on-tertiary": "#ffffff",
+                    "on-surface": "#0b1c30",
+                    "secondary-fixed": "#e0e3e5",
+                    "inverse-surface": "#213145",
+                    "on-error-container": "#93000a",
+                    "secondary": "#5c5f61",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-on-surface": "#eaf1ff",
+                    "surface-dim": "#cbdbf5",
+                    "on-tertiary-fixed-variant": "#7d2d00",
+                    "surface-tint": "#0053db",
+                    "on-tertiary-container": "#ffede6",
+                    "surface": "#f8f9ff",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed-variant": "#444749",
+                    "inverse-primary": "#b4c5ff",
+                    "on-background": "#0b1c30",
+                    "background": "#f8f9ff",
+                    "on-surface-variant": "#434655",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "surface-container-highest": "#d3e4fe",
+                    "outline": "#737686",
+                    "primary-fixed": "#dbe1ff",
+                    "on-primary-container": "#eeefff",
+                    "surface-container": "#e5eeff",
+                    "tertiary-fixed-dim": "#ffb596",
+                    "secondary-container": "#e0e3e5",
+                    "on-error": "#ffffff",
+                    "on-secondary-container": "#626567",
+                    "on-secondary": "#ffffff",
+                    "tertiary": "#943700",
+                    "primary": "#004ac6",
+                    "surface-bright": "#f8f9ff",
+                    "tertiary-fixed": "#ffdbcd",
+                    "surface-container-high": "#dce9ff",
+                    "on-secondary-fixed": "#191c1e",
+                    "surface-variant": "#d3e4fe",
+                    "primary-container": "#2563eb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "gutter-mobile": "12px",
+                    "margin-mobile": "20px",
+                    "md": "16px",
+                    "xl": "32px",
+                    "base": "4px",
+                    "sm": "8px",
+                    "lg": "24px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9ff;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            user-select: none;
+        }
+        .bento-card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+        }
+        .bento-card:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col pb-20">
+<!-- TopAppBar -->
+<header class="bg-surface docked full-width top-0 z-40 border-b border-outline-variant flex justify-between items-center px-margin-mobile w-full py-sm">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a modern homeowner with a friendly expression. The person has clean-cut features and is wearing a high-quality navy blue sweater. The background is a soft-focus, minimalist smart home interior with warm wooden accents and cool blue ambient lighting, reflecting a high-end corporate and tech-savvy lifestyle." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOL58kQUptWlJ45cYKogot6T5meexmu6xbvIr9t7ctWasaCWv325fwS-3-Laxk-Nd0ULy3cu5xKRojO-p9sQAU1-EEGfHf2Oiv7h4423sJK49Aa8DzfELAER-MPobpFRuHz9yTsJGuri5IgEMZfN7G0I8WiisQxwe92LaF1UWZ2qrqYevwauTCUnFkpZIoV0tHzgJu7UKxCLaxCTaXVZClcreUWB_LrP0kXtISVJ9miChdPAt9oq9yZg"/>
+</div>
+<h1 class="font-headline-md text-headline-md-mobile font-bold text-primary">Settings</h1>
+</div>
+<button class="material-symbols-outlined text-primary hover:bg-surface-container-high p-sm rounded-full transition-transform active:scale-95 duration-150">
+            notifications
+        </button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow px-margin-mobile py-lg max-w-2xl mx-auto w-full flex flex-col gap-xl">
+<!-- Profile Section -->
+<section class="bento-card bg-surface-container-lowest rounded-xl p-md flex items-center gap-lg border border-outline-variant">
+<div class="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A close-up high-definition shot of a professional user profile photo. The lighting is bright and even, matching a modern light-mode interface. The individual has a confident look, set against a clean, blurred office background with hints of glass and greenery. The overall aesthetic is clean, corporate, and trustworthy." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuAgJtMgbWHp7Dv9wdE4T3Do-Y9zP3dDwlxBKEv9b9qqC6bRoFnnhoaVk3cevMU2-Xa8fvWBTf6UJS4QraO52nHP-m7DzS9ElS5glRYRPnuIXDUwxEohJRApTlVAlebRl0agAERV4eF718Qe1PPpwk2p5CbAWKokd2AXyc2lZOlvZ2ubl9P8O0f6vfe5d4eppSZgAPU1ndq8Jc0Tkc55LBKJpjo2572-RTP1jQM8p76sjCuOR019gRSg"/>
+</div>
+<div class="flex-grow">
+<h2 class="font-headline-sm text-headline-sm-mobile text-on-surface">Alex Thompson</h2>
+<p class="font-label-md text-label-md text-on-surface-variant">Home Administrator</p>
+</div>
+<button class="material-symbols-outlined text-outline hover:text-primary transition-colors">
+                edit
+            </button>
+</section>
+<!-- Sync Status Card (Bento Style) -->
+<section class="bg-primary-container text-on-primary-container rounded-xl p-md flex justify-between items-center relative overflow-hidden">
+<div class="relative z-10">
+<div class="flex items-center gap-sm mb-xs">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">cloud_done</span>
+<span class="font-label-md text-label-md">Cloud Sync: Active</span>
+</div>
+<p class="font-label-sm text-label-sm opacity-80">Last synced 1m ago</p>
+</div>
+<button class="bg-on-primary-container text-primary px-md py-xs rounded-full font-label-md text-label-md active:scale-95 transition-transform relative z-10">
+                Sync Now
+            </button>
+<!-- Decorative atmospheric element -->
+<div class="absolute top-[-50%] right-[-10%] w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
+</section>
+<!-- Menu Group: Account & Preferences -->
+<section class="flex flex-col gap-sm">
+<h3 class="font-label-md text-label-md text-outline px-sm">Preferences</h3>
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden">
+<!-- Account Settings -->
+<button class="w-full flex items-center justify-between p-md hover:bg-surface-container-low transition-colors border-b border-outline-variant group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary">drive_apps_script</span>
+<span class="font-body-md text-body-md text-on-surface">Account Settings</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:translate-x-1 transition-transform">chevron_right</span>
+</button>
+<!-- Notification Preferences -->
+<button class="w-full flex items-center justify-between p-md hover:bg-surface-container-low transition-colors border-b border-outline-variant group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary">notifications_active</span>
+<span class="font-body-md text-body-md text-on-surface">Notification Preferences</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:translate-x-1 transition-transform">chevron_right</span>
+</button>
+<!-- Manage Floor Plans -->
+<button class="w-full flex items-center justify-between p-md hover:bg-surface-container-low transition-colors border-b border-outline-variant group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary">layers</span>
+<span class="font-body-md text-body-md text-on-surface">Manage Floor Plans</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:translate-x-1 transition-transform">chevron_right</span>
+</button>
+<!-- Manage Devices -->
+<button class="w-full flex items-center justify-between p-md hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary">devices_other</span>
+<span class="font-body-md text-body-md text-on-surface">Manage Devices</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:translate-x-1 transition-transform">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- About Section -->
+<section class="flex flex-col gap-sm">
+<h3 class="font-label-md text-label-md text-outline px-sm">System</h3>
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-md flex flex-col gap-md">
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface">About Lumina</span>
+<span class="font-label-md text-label-md text-on-surface-variant">v2.4.8 (Enterprise)</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface">Terms of Service</span>
+<span class="material-symbols-outlined text-outline text-sm">open_in_new</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface">Privacy Policy</span>
+<span class="material-symbols-outlined text-outline text-sm">open_in_new</span>
+</div>
+</div>
+</section>
+<!-- Logout Button -->
+<section class="mt-lg">
+<button class="w-full py-md px-lg rounded-xl flex items-center justify-center gap-sm text-error font-headline-sm text-headline-sm-mobile border-2 border-error-container hover:bg-error-container transition-all active:scale-[0.97]" id="logoutBtn">
+<span class="material-symbols-outlined">logout</span>
+                Logout
+            </button>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter-mobile pb-safe bg-surface border-t border-outline-variant h-16">
+<button class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:bg-surface-container-low transition-all duration-200 active:scale-90">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:bg-surface-container-low transition-all duration-200 active:scale-90">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+<span class="font-label-sm text-label-sm">Floor</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:bg-surface-container-low transition-all duration-200 active:scale-90 relative">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+<span class="font-label-sm text-label-sm">Alerts</span>
+<!-- Simple Badge -->
+<span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full border-2 border-surface"></span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant py-1 hover:bg-surface-container-low transition-all duration-200 active:scale-90">
+<span class="material-symbols-outlined" data-icon="insert_chart">insert_chart</span>
+<span class="font-label-sm text-label-sm">Usage</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 transition-all duration-200 active:scale-90">
+<span class="material-symbols-outlined" data-icon="settings" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</button>
+</nav>
+<script>
+        // Micro-interaction for the logout button
+        const logoutBtn = document.getElementById('logoutBtn');
+        logoutBtn.addEventListener('click', () => {
+            if(confirm('Are you sure you want to log out?')) {
+                logoutBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Logging out...';
+                setTimeout(() => {
+                    alert('Logged out successfully.');
+                    location.reload();
+                }, 1000);
+            }
+        });
+
+        // Hover effects and haptic feedback simulations for menu items
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('touchstart', () => {
+                // Potential for haptic feedback API if supported
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(10);
+                }
+            });
+        });
+
+        // Atmosphere: subtle scroll shadow logic for the top bar
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 10) {
+                header.classList.add('shadow-md');
+                header.classList.remove('border-b');
+            } else {
+                header.classList.remove('shadow-md');
+                header.classList.add('border-b');
+            }
+        });
+    </script>
+</body></html>

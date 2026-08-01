@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lumina Home - Automation & Safety</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .active-fill {
+      font-variation-settings: 'FILL' 1;
+    }
+    /* Smooth transition for toggles */
+    .toggle-dot {
+      transition: all 0.3s ease-in-out;
+    }
+    input:checked ~ .toggle-dot {
+      transform: translateX(100%);
+    }
+    /* Range slider custom styling */
+    input[type='range'] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    input[type='range']::-webkit-slider-runnable-track {
+      background: #e5eeff;
+      height: 8px;
+      border-radius: 4px;
+    }
+    input[type='range']::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      margin-top: -6px;
+      background-color: #004ac6;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-low": "#eff4ff",
+            "outline-variant": "#c3c6d7",
+            "error": "#ba1a1a",
+            "primary-fixed-dim": "#b4c5ff",
+            "on-primary-fixed": "#00174b",
+            "tertiary-container": "#bc4800",
+            "secondary-fixed-dim": "#c4c7c9",
+            "error-container": "#ffdad6",
+            "on-tertiary-fixed": "#360f00",
+            "on-tertiary": "#ffffff",
+            "on-surface": "#0b1c30",
+            "secondary-fixed": "#e0e3e5",
+            "inverse-surface": "#213145",
+            "on-error-container": "#93000a",
+            "secondary": "#5c5f61",
+            "surface-container-lowest": "#ffffff",
+            "inverse-on-surface": "#eaf1ff",
+            "surface-dim": "#cbdbf5",
+            "on-tertiary-fixed-variant": "#7d2d00",
+            "surface-tint": "#0053db",
+            "on-tertiary-container": "#ffede6",
+            "surface": "#f8f9ff",
+            "on-primary": "#ffffff",
+            "on-secondary-fixed-variant": "#444749",
+            "inverse-primary": "#b4c5ff",
+            "on-background": "#0b1c30",
+            "background": "#f8f9ff",
+            "on-surface-variant": "#434655",
+            "on-primary-fixed-variant": "#003ea8",
+            "surface-container-highest": "#d3e4fe",
+            "outline": "#737686",
+            "primary-fixed": "#dbe1ff",
+            "on-primary-container": "#eeefff",
+            "surface-container": "#e5eeff",
+            "tertiary-fixed-dim": "#ffb596",
+            "secondary-container": "#e0e3e5",
+            "on-error": "#ffffff",
+            "on-secondary-container": "#626567",
+            "on-secondary": "#ffffff",
+            "tertiary": "#943700",
+            "primary": "#004ac6",
+            "surface-bright": "#f8f9ff",
+            "tertiary-fixed": "#ffdbcd",
+            "surface-container-high": "#dce9ff",
+            "on-secondary-fixed": "#191c1e",
+            "surface-variant": "#d3e4fe",
+            "primary-container": "#2563eb"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "xs": "4px",
+            "gutter-mobile": "12px",
+            "margin-mobile": "20px",
+            "md": "16px",
+            "xl": "32px",
+            "base": "4px",
+            "sm": "8px",
+            "lg": "24px"
+          },
+          "fontFamily": {
+            "headline-lg-mobile": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-lg": ["Inter"],
+            "headline-sm": ["Inter"],
+            "label-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-md": ["Inter"]
+          },
+          "fontSize": {
+            "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-surface fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile py-sm border-b border-outline-variant">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="A professional studio headshot of a friendly young woman with a warm expression, softly lit with high-key lighting that emphasizes a clean and modern tech-lifestyle aesthetic. She is wearing a simple neutral-colored top. The background is a soft, blurred minimalist home office with hints of green indoor plants, maintaining a bright and corporate but approachable feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbo6erqJP58LDccSXuLqX-pSbWoyE2JrxxM53S55J9msAjrev49HhiW1dVQkxW_wWYhnMiixBASybnoFCnu9gS0Rg_Qo-5g0Mbi7osOMXhjuTbpb2lPo3f-TZHsVYBYJPzWltk3QBvFyFrX00iCMxpQad2KbYATPBkvEnwvWIubGG18I50gYra8MwShRjSfvPIyC8PxztTp1f3Uok9qcf9jHgYNnB-Zgaq5iVIP7dXJoPIRfUv67t8fg"/>
+</div>
+<h1 class="font-headline-md text-headline-md-mobile font-bold text-primary">Lumina Home</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center text-primary hover:bg-surface-container-high rounded-full transition-all active:scale-95">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<main class="pt-20 px-margin-mobile max-w-2xl mx-auto space-y-xl">
+<!-- Header Section -->
+<section>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Device Automation</h2>
+<p class="text-on-surface-variant font-body-md mt-sm">Configure safety limits and recurring schedules for your smart home.</p>
+</section>
+<!-- Navigation Tabs (Custom) -->
+<nav class="flex p-1 bg-surface-container-low rounded-xl">
+<button class="flex-1 py-sm px-4 rounded-lg font-label-md transition-all bg-primary-container text-on-primary-container shadow-sm" id="btn-safety" onclick="switchTab('safety')">Safety Limits</button>
+<button class="flex-1 py-sm px-4 rounded-lg font-label-md transition-all text-on-surface-variant hover:bg-white" id="btn-auto" onclick="switchTab('auto')">Auto-Schedule</button>
+</nav>
+<!-- Safety Scheduling (Irons) -->
+<div class="space-y-lg" id="section-safety">
+<div class="bg-surface-container-lowest rounded-xl p-lg shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/30">
+<div class="flex items-center justify-between mb-lg">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 bg-surface-container-high rounded-full flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">iron</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-on-surface">Steam Iron Pro</h3>
+<p class="font-label-sm text-on-surface-variant">Master Bedroom</p>
+</div>
+</div>
+<span class="bg-primary-container/20 text-primary font-label-sm px-3 py-1 rounded-full">Safety Active</span>
+</div>
+<div class="space-y-xl">
+<div>
+<div class="flex justify-between items-end mb-sm">
+<label class="font-label-md text-on-surface">Max ON Duration</label>
+<span class="font-headline-sm text-primary" id="range-val">20 min</span>
+</div>
+<input class="w-full" id="safety-range" max="60" min="5" oninput="document.getElementById('range-val').innerText = this.value + ' min'" step="5" type="range" value="20"/>
+<div class="flex justify-between mt-2 px-1">
+<span class="text-[10px] text-outline">5m</span>
+<span class="text-[10px] text-outline">60m</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-md rounded-lg flex gap-sm items-start">
+<span class="material-symbols-outlined text-primary scale-90">info</span>
+<p class="text-label-sm text-on-surface-variant leading-tight">
+              Safety Shut-off: This device will automatically power down after the specified duration to prevent overheating and fire hazards.
+            </p>
+</div>
+<button class="w-full bg-primary text-on-primary font-label-md py-md rounded-xl shadow-md active:scale-95 transition-transform">
+            Save Safety Configuration
+          </button>
+</div>
+</div>
+<!-- History Log -->
+<div class="bg-white rounded-xl overflow-hidden border border-outline-variant/30">
+<div class="px-lg py-md border-b border-outline-variant/20 flex justify-between items-center">
+<h4 class="font-label-md text-on-surface">Safety History</h4>
+<span class="material-symbols-outlined text-outline cursor-pointer hover:text-primary">history</span>
+</div>
+<div class="divide-y divide-outline-variant/10">
+<div class="px-lg py-md flex justify-between items-center">
+<div class="flex gap-md items-center">
+<span class="material-symbols-outlined text-error text-[20px]">power_off</span>
+<div>
+<p class="text-label-md text-on-surface">Auto-shutoff triggered</p>
+<p class="text-[11px] text-on-surface-variant">Today, 10:45 AM • Limit reached</p>
+</div>
+</div>
+<span class="text-label-sm text-outline">20 min</span>
+</div>
+<div class="px-lg py-md flex justify-between items-center">
+<div class="flex gap-md items-center">
+<span class="material-symbols-outlined text-secondary text-[20px]">power_settings_new</span>
+<div>
+<p class="text-label-md text-on-surface">Manual power off</p>
+<p class="text-[11px] text-on-surface-variant">Yesterday, 6:12 PM</p>
+</div>
+</div>
+<span class="text-label-sm text-outline">12 min</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Auto-Schedule (Bulbs) -->
+<div class="hidden space-y-lg" id="section-auto">
+<div class="bg-surface-container-lowest rounded-xl p-lg shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/30">
+<div class="flex items-center justify-between mb-lg">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 bg-surface-container-high rounded-full flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">lightbulb</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-on-surface">Hallway Light</h3>
+<p class="font-label-sm text-on-surface-variant">Main Entrance</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-secondary-container peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="space-y-xl">
+<div class="grid grid-cols-2 gap-lg">
+<div class="space-y-sm">
+<label class="font-label-sm text-on-surface-variant px-1">Start Time</label>
+<input class="w-full bg-surface p-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary focus:border-transparent font-headline-sm text-on-surface" type="time" value="18:30"/>
+</div>
+<div class="space-y-sm">
+<label class="font-label-sm text-on-surface-variant px-1">End Time</label>
+<input class="w-full bg-surface p-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary focus:border-transparent font-headline-sm text-on-surface" type="time" value="23:00"/>
+</div>
+</div>
+<div class="space-y-sm">
+<label class="font-label-md text-on-surface">Repeat</label>
+<div class="flex justify-between gap-xs">
+<button class="w-10 h-10 rounded-full border border-outline-variant text-label-sm flex items-center justify-center hover:bg-surface-container-high">S</button>
+<button class="w-10 h-10 rounded-full bg-primary text-on-primary text-label-sm flex items-center justify-center">M</button>
+<button class="w-10 h-10 rounded-full bg-primary text-on-primary text-label-sm flex items-center justify-center">T</button>
+<button class="w-10 h-10 rounded-full bg-primary text-on-primary text-label-sm flex items-center justify-center">W</button>
+<button class="w-10 h-10 rounded-full bg-primary text-on-primary text-label-sm flex items-center justify-center">T</button>
+<button class="w-10 h-10 rounded-full bg-primary text-on-primary text-label-sm flex items-center justify-center">F</button>
+<button class="w-10 h-10 rounded-full border border-outline-variant text-label-sm flex items-center justify-center hover:bg-surface-container-high">S</button>
+</div>
+</div>
+<div class="pt-sm">
+<button class="w-full bg-primary text-on-primary font-label-md py-md rounded-xl shadow-md active:scale-95 transition-transform">
+              Save Automation Schedule
+            </button>
+</div>
+</div>
+</div>
+<!-- Quick Scene Suggestions -->
+<div class="grid grid-cols-2 gap-md">
+<div class="bg-surface-container-high/40 p-lg rounded-xl border border-outline-variant/30 text-center space-y-sm cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-primary">wb_twilight</span>
+<p class="font-label-md text-on-surface">Sunset On</p>
+</div>
+<div class="bg-surface-container-high/40 p-lg rounded-xl border border-outline-variant/30 text-center space-y-sm cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-primary">bedtime</span>
+<p class="font-label-md text-on-surface">Goodnight</p>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter-mobile pb-safe bg-surface border-t border-outline-variant h-16">
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1" href="#">
+<span class="material-symbols-outlined">layers</span>
+<span class="font-label-sm text-label-sm">Floor</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1" href="#">
+<span class="material-symbols-outlined">notifications_active</span>
+<span class="font-label-sm text-label-sm">Alerts</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1" href="#">
+<span class="material-symbols-outlined active-fill">insert_chart</span>
+<span class="font-label-sm text-label-sm">Usage</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant py-1" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+</nav>
+<script>
+    function switchTab(tab) {
+      const safetySection = document.getElementById('section-safety');
+      const autoSection = document.getElementById('section-auto');
+      const safetyBtn = document.getElementById('btn-safety');
+      const autoBtn = document.getElementById('btn-auto');
+
+      if (tab === 'safety') {
+        safetySection.classList.remove('hidden');
+        autoSection.classList.add('hidden');
+        safetyBtn.classList.add('bg-primary-container', 'text-on-primary-container', 'shadow-sm');
+        safetyBtn.classList.remove('text-on-surface-variant', 'hover:bg-white');
+        autoBtn.classList.remove('bg-primary-container', 'text-on-primary-container', 'shadow-sm');
+        autoBtn.classList.add('text-on-surface-variant', 'hover:bg-white');
+      } else {
+        safetySection.classList.add('hidden');
+        autoSection.classList.remove('hidden');
+        autoBtn.classList.add('bg-primary-container', 'text-on-primary-container', 'shadow-sm');
+        autoBtn.classList.remove('text-on-surface-variant', 'hover:bg-white');
+        safetyBtn.classList.remove('bg-primary-container', 'text-on-primary-container', 'shadow-sm');
+        safetyBtn.classList.add('text-on-surface-variant', 'hover:bg-white');
+      }
+    }
+  </script>
+</body></html>

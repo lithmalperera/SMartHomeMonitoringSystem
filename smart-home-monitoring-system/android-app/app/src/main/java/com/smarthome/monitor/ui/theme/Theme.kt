@@ -1,51 +1,98 @@
 package com.smarthome.monitor.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = Primary,
+    onPrimary = OnPrimary,
+    primaryContainer = PrimaryContainer,
+    onPrimaryContainer = OnPrimaryContainer,
+    secondary = Secondary,
+    onSecondary = OnSecondary,
+    secondaryContainer = SecondaryContainer,
+    onSecondaryContainer = OnSecondaryContainer,
+    tertiary = Tertiary,
+    onTertiary = OnTertiary,
+    tertiaryContainer = TertiaryContainer,
+    onTertiaryContainer = OnTertiaryContainer,
+    error = Error,
+    onError = OnError,
+    errorContainer = ErrorContainer,
+    onErrorContainer = OnErrorContainer,
+    background = Background,
+    onBackground = OnBackground,
+    surface = Surface,
+    onSurface = OnSurface,
+    surfaceVariant = SurfaceVariant,
+    onSurfaceVariant = OnSurfaceVariant,
+    outline = Outline,
+    outlineVariant = OutlineVariant,
+    inverseSurface = InverseSurface,
+    inverseOnSurface = InverseOnSurface,
+    inversePrimary = InversePrimary,
+    surfaceTint = SurfaceTint,
+    surfaceBright = SurfaceBright,
+    surfaceDim = SurfaceDim,
+    surfaceContainer = SurfaceContainer,
+    surfaceContainerLow = SurfaceContainerLow,
+    surfaceContainerHigh = SurfaceContainerHigh,
+    surfaceContainerHighest = SurfaceContainerHighest,
+    surfaceContainerLowest = SurfaceContainerLowest
+)
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+private val DarkColorScheme = darkColorScheme(
+    primary = PrimaryFixedDim,
+    onPrimary = OnPrimaryFixed,
+    primaryContainer = Primary,
+    onPrimaryContainer = OnPrimary,
+    secondary = SecondaryFixedDim,
+    onSecondary = OnSecondaryFixed,
+    secondaryContainer = Secondary,
+    onSecondaryContainer = OnSecondary,
+    tertiary = TertiaryFixedDim,
+    onTertiary = OnTertiaryFixed,
+    tertiaryContainer = Tertiary,
+    onTertiaryContainer = OnTertiary,
+    error = Error,
+    onError = OnError,
+    errorContainer = ErrorContainer,
+    onErrorContainer = OnErrorContainer,
+    background = InverseSurface,
+    onBackground = InverseOnSurface,
+    surface = InverseSurface,
+    onSurface = InverseOnSurface,
+    surfaceVariant = SurfaceVariant,
+    onSurfaceVariant = OnSurfaceVariant,
+    outline = Outline,
+    outlineVariant = OutlineVariant,
+    inverseSurface = Surface,
+    inverseOnSurface = OnSurface,
+    inversePrimary = Primary,
+    surfaceTint = PrimaryFixedDim,
+    surfaceBright = SurfaceBright,
+    surfaceDim = SurfaceDim,
+    surfaceContainer = SurfaceContainer,
+    surfaceContainerLow = SurfaceContainerLow,
+    surfaceContainerHigh = SurfaceContainerHigh,
+    surfaceContainerHighest = SurfaceContainerHighest,
+    surfaceContainerLowest = SurfaceContainerLowest
 )
 
 @Composable
 fun SmartHomeMonitoringSystemTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (darkTheme) DarkColorScheme else LightColorScheme
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }

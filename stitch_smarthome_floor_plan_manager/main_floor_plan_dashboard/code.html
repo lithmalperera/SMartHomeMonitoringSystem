@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Lumina Home - Floor Plan</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#eff4ff",
+                    "outline-variant": "#c3c6d7",
+                    "error": "#ba1a1a",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "on-primary-fixed": "#00174b",
+                    "tertiary-container": "#bc4800",
+                    "secondary-fixed-dim": "#c4c7c9",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed": "#360f00",
+                    "on-tertiary": "#ffffff",
+                    "on-surface": "#0b1c30",
+                    "secondary-fixed": "#e0e3e5",
+                    "inverse-surface": "#213145",
+                    "on-error-container": "#93000a",
+                    "secondary": "#5c5f61",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-on-surface": "#eaf1ff",
+                    "surface-dim": "#cbdbf5",
+                    "on-tertiary-fixed-variant": "#7d2d00",
+                    "surface-tint": "#0053db",
+                    "on-tertiary-container": "#ffede6",
+                    "surface": "#f8f9ff",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed-variant": "#444749",
+                    "inverse-primary": "#b4c5ff",
+                    "on-background": "#0b1c30",
+                    "background": "#f8f9ff",
+                    "on-surface-variant": "#434655",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "surface-container-highest": "#d3e4fe",
+                    "outline": "#737686",
+                    "primary-fixed": "#dbe1ff",
+                    "on-primary-container": "#eeefff",
+                    "surface-container": "#e5eeff",
+                    "tertiary-fixed-dim": "#ffb596",
+                    "secondary-container": "#e0e3e5",
+                    "on-error": "#ffffff",
+                    "on-secondary-container": "#626567",
+                    "on-secondary": "#ffffff",
+                    "tertiary": "#943700",
+                    "primary": "#004ac6",
+                    "surface-bright": "#f8f9ff",
+                    "tertiary-fixed": "#ffdbcd",
+                    "surface-container-high": "#dce9ff",
+                    "on-secondary-fixed": "#191c1e",
+                    "surface-variant": "#d3e4fe",
+                    "primary-container": "#2563eb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "gutter-mobile": "12px",
+                    "margin-mobile": "20px",
+                    "md": "16px",
+                    "xl": "32px",
+                    "base": "4px",
+                    "sm": "8px",
+                    "lg": "24px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .floor-plan-canvas {
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            height: calc(100vh - 128px);
+            overflow: hidden;
+        }
+        .pulse-on {
+            animation: pulse-green 2s infinite;
+        }
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+        .pulse-error {
+            animation: pulse-red 1.5s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .device-node {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .device-node:active {
+            transform: scale(0.9);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background overflow-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-on-surface border-b border-outline-variant dark:border-outline docked full-width top-0 z-50 flex justify-between items-center px-margin-mobile w-full py-sm">
+<div class="flex items-center gap-sm">
+<div class="flex items-center bg-surface-container-high px-3 py-1.5 rounded-full cursor-pointer hover:bg-surface-variant transition-colors group">
+<span class="font-label-md text-label-md text-primary dark:text-primary-fixed-dim">Ground Floor</span>
+<span class="material-symbols-outlined text-[18px] ml-1 group-hover:translate-y-0.5 transition-transform">keyboard_arrow_down</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-secondary hover:bg-surface-container-high transition-transform active:scale-95">
+<span class="material-symbols-outlined">search</span>
+</button>
+<div class="relative">
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-secondary hover:bg-surface-container-high transition-transform active:scale-95">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border border-surface"></span>
+</div>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional high-resolution close-up portrait of a tech-savvy homeowner, soft natural lighting, minimalist blurred modern interior background, clean and professional look matching the Lumina brand's trustworthy and sophisticated visual identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIVkUxZAfsIwEcOe7dqSce8WmOKSSITnkedXur38KIlbAAc8REYKGwbQbx0-RRk4Xh7MNvurtTOD-tSHNYqL6ZIh5A3AAT8ELtwbYOSC8v9WrjKuPtuZ83Pax11-ARQEJfJNIrLl8VnOmQecRlipgBJgIdSs8_B4BMaWE0YvptPgyfPAGxU8CuHL7TVNivdfQw4CzeJ5j2znoTUm8DjfuYHpS2o-lz1fv0Bo1btvuu3iJoKGiz-aDQqA"/>
+</div>
+</div>
+</header>
+<!-- Floor Plan Main Canvas -->
+<main class="relative w-full h-screen bg-surface-container-low overflow-hidden">
+<div class="floor-plan-canvas w-full h-full flex items-center justify-center p-xl" data-alt="An architectural top-down 3D schematic floor plan of a modern smart home, including a living room, kitchen, and bedroom. The style is clean, technical, and minimalist with soft ambient occlusion shadows, light gray walls, and light wood flooring textures, presented in a high-clarity professional light mode aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCWGj5fTtqbVVexWKLyBIczk5tO11raMe8b_0aX_nfcY6S3W4DohT6W7algzxL5tEt-7hCMHyYEdza-VPv9DZXQtMab4_j6ZPuHa-WPB_U23gWHLaQmncqmzJGgnF0mE4cMpKTu9pZEgGFrC01s9Y1oZEnxNcURSasYvXB4UtJ_t3S_fRYCBCXcHbJ0Wr-h1p-j8pppwjLQUFkdbI630AN_PGZIlt1vCVUlJedvn1YnSCwhAK9tUgwUfg')">
+<!-- Device Grid Overlay -->
+<div class="absolute inset-0 w-full h-full pointer-events-none opacity-20" style="background-image: radial-gradient(#737686 1px, transparent 1px); background-size: 40px 40px;"></div>
+<!-- Interactive Device Nodes -->
+<!-- Living Room Light (ON) -->
+<div class="device-node absolute top-[35%] left-[45%] pointer-events-auto flex flex-col items-center">
+<div class="w-12 h-12 rounded-full bg-surface shadow-lg flex items-center justify-center border-2 border-primary pulse-on cursor-pointer">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+</div>
+<div class="mt-2 px-2 py-0.5 bg-surface-container-highest rounded-md shadow-sm border border-outline-variant">
+<span class="font-label-sm text-label-sm text-on-surface">Living Room</span>
+</div>
+</div>
+<!-- Kitchen Outlet (OFF) -->
+<div class="device-node absolute top-[25%] left-[20%] pointer-events-auto flex flex-col items-center">
+<div class="w-12 h-12 rounded-full bg-surface shadow-md flex items-center justify-center border-2 border-outline-variant cursor-pointer grayscale opacity-80 hover:grayscale-0 hover:opacity-100">
+<span class="material-symbols-outlined text-secondary">power</span>
+</div>
+<div class="mt-2 px-2 py-0.5 bg-surface-container-highest rounded-md shadow-sm border border-outline-variant">
+<span class="font-label-sm text-label-sm text-on-surface">Coffee Maker</span>
+</div>
+</div>
+<!-- Master Bedroom Iron (ERROR) -->
+<div class="device-node absolute top-[60%] left-[75%] pointer-events-auto flex flex-col items-center">
+<div class="w-12 h-12 rounded-full bg-surface shadow-lg flex items-center justify-center border-2 border-error pulse-error cursor-pointer">
+<span class="material-symbols-outlined text-error">iron</span>
+</div>
+<div class="mt-2 px-2 py-0.5 bg-error-container rounded-md shadow-sm border border-error">
+<span class="font-label-sm text-label-sm text-on-error-container">Master Iron</span>
+</div>
+</div>
+<!-- Hallway Outlet (ON) -->
+<div class="device-node absolute top-[50%] left-[30%] pointer-events-auto flex flex-col items-center">
+<div class="w-12 h-12 rounded-full bg-surface shadow-lg flex items-center justify-center border-2 border-primary pulse-on cursor-pointer">
+<span class="material-symbols-outlined text-primary">outlet</span>
+</div>
+<div class="mt-2 px-2 py-0.5 bg-surface-container-highest rounded-md shadow-sm border border-outline-variant">
+<span class="font-label-sm text-label-sm text-on-surface">Air Purifier</span>
+</div>
+</div>
+<!-- Front Door Camera (ON) -->
+<div class="device-node absolute top-[80%] left-[15%] pointer-events-auto flex flex-col items-center">
+<div class="w-12 h-12 rounded-full bg-surface shadow-lg flex items-center justify-center border-2 border-primary pulse-on cursor-pointer">
+<span class="material-symbols-outlined text-primary">videocam</span>
+</div>
+<div class="mt-2 px-2 py-0.5 bg-surface-container-highest rounded-md shadow-sm border border-outline-variant">
+<span class="font-label-sm text-label-sm text-on-surface">Entry Cam</span>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB: Add Device -->
+<button class="fixed bottom-24 right-margin-mobile w-14 h-14 bg-primary text-on-primary rounded-2xl shadow-xl flex items-center justify-center hover:bg-primary-container transition-all active:scale-95 group z-40">
+<span class="material-symbols-outlined text-[28px] group-hover:rotate-90 transition-transform">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter-mobile pb-safe bg-surface dark:bg-on-surface h-16 border-t border-outline-variant dark:border-outline rounded-t-xl">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant py-1 hover:bg-surface-container-low dark:hover:bg-inverse-surface rounded-lg transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm mt-1">Home</span>
+</a>
+<!-- Floor (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-full px-4 py-1 active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">layers</span>
+<span class="font-label-sm text-label-sm">Floor</span>
+</a>
+<!-- Alerts -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant py-1 hover:bg-surface-container-low dark:hover:bg-inverse-surface rounded-lg transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">notifications_active</span>
+<span class="font-label-sm text-label-sm mt-1">Alerts</span>
+</a>
+<!-- Usage -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant py-1 hover:bg-surface-container-low dark:hover:bg-inverse-surface rounded-lg transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">insert_chart</span>
+<span class="font-label-sm text-label-sm mt-1">Usage</span>
+</a>
+<!-- Settings -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant py-1 hover:bg-surface-container-low dark:hover:bg-inverse-surface rounded-lg transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-sm text-label-sm mt-1">Settings</span>
+</a>
+</nav>
+<!-- Overlay Context Menu (Hidden by default, for micro-interactions demo) -->
+<div class="hidden fixed z-[100] bg-white rounded-xl shadow-2xl p-2 min-w-[160px] border border-outline-variant opacity-0 scale-95 transition-all" id="device-menu">
+<div class="flex items-center gap-3 p-3 hover:bg-surface-container rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-primary">power_settings_new</span>
+<span class="font-label-md text-label-md">Turn Off</span>
+</div>
+<div class="flex items-center gap-3 p-3 hover:bg-surface-container rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-secondary">tune</span>
+<span class="font-label-md text-label-md">Settings</span>
+</div>
+</div>
+<script>
+        // Simple Interaction Logic
+        document.querySelectorAll('.device-node').forEach(node => {
+            node.addEventListener('click', (e) => {
+                const menu = document.getElementById('device-menu');
+                menu.classList.remove('hidden');
+                setTimeout(() => {
+                    menu.classList.add('opacity-100', 'scale-100');
+                    menu.style.top = `${Math.min(e.clientY, window.innerHeight - 150)}px`;
+                    menu.style.left = `${Math.min(e.clientX, window.innerWidth - 180)}px`;
+                }, 10);
+            });
+        });
+
+        // Close menu on click elsewhere
+        window.addEventListener('click', (e) => {
+            if (!e.target.closest('.device-node') && !e.target.closest('#device-menu')) {
+                const menu = document.getElementById('device-menu');
+                menu.classList.remove('opacity-100', 'scale-100');
+                setTimeout(() => menu.classList.add('hidden'), 200);
+            }
+        });
+
+        // Toggle Active State Mockup
+        document.querySelectorAll('.device-node').forEach(node => {
+            node.addEventListener('dblclick', () => {
+                const circle = node.querySelector('div');
+                if(circle.classList.contains('border-primary')) {
+                    circle.classList.remove('border-primary', 'pulse-on');
+                    circle.classList.add('border-outline-variant', 'grayscale', 'opacity-80');
+                } else {
+                    circle.classList.add('border-primary', 'pulse-on');
+                    circle.classList.remove('border-outline-variant', 'grayscale', 'opacity-80');
+                }
+            });
+        });
+    </script>
+</body></html>

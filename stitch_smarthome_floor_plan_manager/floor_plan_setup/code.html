@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Setup Floor Plan - Lumina Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+
+        /* Abstract Grid Pattern for the upload area */
+        .grid-pattern {
+            background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        /* Animation for the grid overlay preview */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#eff4ff",
+                        "outline-variant": "#c3c6d7",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "on-primary-fixed": "#00174b",
+                        "tertiary-container": "#bc4800",
+                        "secondary-fixed-dim": "#c4c7c9",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#360f00",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#0b1c30",
+                        "secondary-fixed": "#e0e3e5",
+                        "inverse-surface": "#213145",
+                        "on-error-container": "#93000a",
+                        "secondary": "#5c5f61",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-dim": "#cbdbf5",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "surface-tint": "#0053db",
+                        "on-tertiary-container": "#ffede6",
+                        "surface": "#f8f9ff",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#444749",
+                        "inverse-primary": "#b4c5ff",
+                        "on-background": "#0b1c30",
+                        "background": "#f8f9ff",
+                        "on-surface-variant": "#434655",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "surface-container-highest": "#d3e4fe",
+                        "outline": "#737686",
+                        "primary-fixed": "#dbe1ff",
+                        "on-primary-container": "#eeefff",
+                        "surface-container": "#e5eeff",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "secondary-container": "#e0e3e5",
+                        "on-error": "#ffffff",
+                        "on-secondary-container": "#626567",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#943700",
+                        "primary": "#004ac6",
+                        "surface-bright": "#f8f9ff",
+                        "tertiary-fixed": "#ffdbcd",
+                        "surface-container-high": "#dce9ff",
+                        "on-secondary-fixed": "#191c1e",
+                        "surface-variant": "#d3e4fe",
+                        "primary-container": "#2563eb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "gutter-mobile": "12px",
+                        "margin-mobile": "20px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "base": "4px",
+                        "sm": "8px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 bg-surface border-b border-outline-variant flex justify-between items-center px-margin-mobile w-full py-sm">
+<div class="flex items-center gap-3">
+<button aria-label="Go back" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm-mobile text-on-surface">Setup Floor Plan</h1>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-variant">
+<img class="w-full h-full object-cover" data-alt="A professional close-up headshot of a smiling young adult with short dark hair, wearing a clean white t-shirt. The background is a soft, out-of-focus modern apartment interior with natural sunlight streaming in, creating a warm and approachable feeling. The aesthetic is high-clarity and minimalist, aligned with a corporate yet human-centric smart home application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3zlbw3oY5XTuNPLi7OQkgTUc24gGmh_5_qTlroaBrYxN1wWPk1IwiZXewQjIhmAxrl9y7TEcGBj7Puk4brQ1UXLPTKH1lZ4uZy0Mliyov0HP93WN80etY5vdylKD0axWviX8Pmoe964gmL3x_QY39RzaoGWQ3hiwWsO03xaJnlCbyaaQQHB9O2uqI3lWh4cB1ge3vE3Y2WlO1GHCeu3MNytcB7VwBWVM2cSd-o0NdqxPDMhzy56db2g"/>
+</div>
+</header>
+<main class="max-w-3xl mx-auto px-margin-mobile mt-lg space-y-xl">
+<!-- Floor Name Input -->
+<section class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant ml-1" for="floor-name">Floor Name</label>
+<input class="w-full h-14 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-body-lg text-on-surface" id="floor-name" placeholder="e.g., Ground Floor" type="text" value="Ground Floor"/>
+</section>
+<!-- Template Selection / Upload Area -->
+<section class="space-y-md">
+<h2 class="font-headline-sm text-headline-sm-mobile text-on-surface">Floor Plan Image</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<!-- Upload Placeholder -->
+<div class="relative group cursor-pointer aspect-video md:aspect-auto md:h-64 rounded-xl border-2 border-dashed border-outline-variant bg-surface-container-low flex flex-col items-center justify-center gap-sm transition-all hover:border-primary hover:bg-surface-container-high" id="upload-area">
+<span class="material-symbols-outlined text-4xl text-primary">cloud_upload</span>
+<p class="font-label-md text-primary">Upload blueprint (SVG, PNG, JPG)</p>
+<p class="text-xs text-on-surface-variant">Max file size 5MB</p>
+</div>
+<!-- Template Selection Bento -->
+<div class="grid grid-cols-2 gap-sm">
+<button class="flex flex-col items-start p-sm bg-white border border-outline-variant rounded-xl hover:shadow-md transition-all active:scale-[0.98]">
+<div class="w-full h-20 bg-surface-container-highest rounded-lg mb-2 overflow-hidden">
+<img class="w-full h-full object-cover opacity-60" data-alt="A clean architectural floor plan of a modern two-bedroom apartment, rendered in high-contrast black and white lines. The design is minimalist and professional, featuring open-plan living spaces and clear geometric room definitions. The lighting is bright and even, presenting a technical yet accessible blueprint aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnfl1aDE_A5a3iLCoAyKniS8NTfKcZop21bZGo4kqsCf9_LVKWWOv8wIJ25YkYYPhJdf8jQeUXkrXPPXuIsFEAKXAZTqM5Q5mKpRE3xC0a5GET6PaZNc_1aoLZMGLAzuHDnql4_yTb8vvYI36kCgMR3l2Y_DKkh99Jv3aQoYHAU3d_6ImdwaSW-PfomAM_C2oQiq21fTvyPu5pxI8MGvcf6HCsulY1DM0uD5hLXEQaPz5T6B0uJ_sgBA"/>
+</div>
+<span class="font-label-sm text-on-surface">Apartment</span>
+</button>
+<button class="flex flex-col items-start p-sm bg-white border border-outline-variant rounded-xl hover:shadow-md transition-all active:scale-[0.98]">
+<div class="w-full h-20 bg-surface-container-highest rounded-lg mb-2 overflow-hidden">
+<img class="w-full h-full object-cover opacity-60" data-alt="A professional house blueprint showing multiple rooms including a large garage and backyard patio. The lines are sharp and precise, presented in a minimalist light-mode style with soft gray tones. The composition is balanced and clear, ideal for a smart home configuration dashboard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwCnivyIFbgfA8jU0rIi2Z2PGOIoKAX2FAXv85wHe-TeJauzsVKoOjHvLLDKkt5ivcf1Ioo6-hSTTFdsnLaBPR8i6ksNZMjwGELPCiRYfP7Bz7TPzzfb-pjmGgshxhMEPMxeBX8wr2IyvM44NhSaeRT1zANQ76m1QWwsw6cDS0F6ZZC6tlsaMthI6zArJLmaLSU7gL3aAZN3IS7BOxTpBSh_FsC9ejNK4s3ZoYZKLQXYdjYHpomFAsIg"/>
+</div>
+<span class="font-label-sm text-on-surface">House</span>
+</button>
+<button class="flex flex-col items-start p-sm bg-white border border-outline-variant rounded-xl hover:shadow-md transition-all active:scale-[0.98]">
+<div class="w-full h-20 bg-surface-container-highest rounded-lg mb-2 overflow-hidden">
+<img class="w-full h-full object-cover opacity-60" data-alt="A spacious office floor plan layout with several glass-walled conference rooms and an open workspace area. The aesthetic is corporate and modern, using pristine white and light gray colors. The lines are clean and represent a sophisticated commercial environment with professional clarity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOGtxn6zDMWXc5dyzySDh90bSUBcowXM7OZ9QKG95OlmoyrcKIsN6WTP9CxrASRkQ0PUibxoETOYtCxPjMjjLudiCdKZXYcHIDRLgpZEJy_WLq2CZY5IBNfzwXvNnJrSdnF-tCIY2E8GTyZUhGt7O3Tk1LlWe0VVdSdntG_JwwY9LeRnh_WnZ2gQNRGPIjWrTjzPrfAY2f4LgLLq1gd7ie8UKB2Oznm4VGT-r-04o50IbQS3MTsna1Kg"/>
+</div>
+<span class="font-label-sm text-on-surface">Office</span>
+</button>
+<button class="flex flex-col items-center justify-center p-sm bg-surface-container-lowest border border-dashed border-outline-variant rounded-xl hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-outline">add</span>
+<span class="font-label-sm text-outline-variant mt-1">Other</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Grid Configuration Tool -->
+<section class="space-y-md">
+<div class="flex justify-between items-center">
+<h2 class="font-headline-sm text-headline-sm-mobile text-on-surface">Grid Configuration</h2>
+<div class="flex gap-2">
+<span class="px-2 py-1 rounded bg-primary-container text-on-primary-container text-[10px] font-bold uppercase tracking-wider">Abstract Mode</span>
+</div>
+</div>
+<div class="bg-white p-lg rounded-xl shadow-sm border border-outline-variant flex flex-col md:flex-row gap-lg">
+<!-- Grid Control Inputs -->
+<div class="flex flex-col gap-md w-full md:w-48">
+<div class="space-y-xs">
+<label class="font-label-sm text-on-surface-variant">Rows</label>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg border border-outline-variant bg-surface hover:bg-surface-container-high transition-colors" id="rows-dec"><span class="material-symbols-outlined text-sm">remove</span></button>
+<input class="w-full text-center border-none bg-surface-container-low rounded-lg font-bold text-on-surface" id="rows-input" type="number" value="12"/>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg border border-outline-variant bg-surface hover:bg-surface-container-high transition-colors" id="rows-inc"><span class="material-symbols-outlined text-sm">add</span></button>
+</div>
+</div>
+<div class="space-y-xs">
+<label class="font-label-sm text-on-surface-variant">Columns</label>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg border border-outline-variant bg-surface hover:bg-surface-container-high transition-colors" id="cols-dec"><span class="material-symbols-outlined text-sm">remove</span></button>
+<input class="w-full text-center border-none bg-surface-container-low rounded-lg font-bold text-on-surface" id="cols-input" type="number" value="12"/>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg border border-outline-variant bg-surface hover:bg-surface-container-high transition-colors" id="cols-inc"><span class="material-symbols-outlined text-sm">add</span></button>
+</div>
+</div>
+<div class="pt-2">
+<p class="text-[11px] text-on-surface-variant leading-tight">Define the abstract layout grid for precise device snapping.</p>
+</div>
+</div>
+<!-- Live Grid Preview -->
+<div class="flex-1 bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden relative h-64 md:h-auto min-h-[200px] grid-pattern flex items-center justify-center">
+<!-- Overlay Grid Container -->
+<div class="absolute inset-4 border border-primary/20 pointer-events-none opacity-50 grid" id="grid-container" style="grid-template-columns: repeat(12, 1fr); grid-template-rows: repeat(12, 1fr);">
+<!-- Grid lines are implicitly created by browser via style -->
+</div>
+<div class="z-10 text-center pointer-events-none px-4">
+<span class="material-symbols-outlined text-primary/40 text-4xl mb-2">grid_view</span>
+<p class="font-label-md text-on-surface-variant opacity-40">Preview Overlay</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Action Bar -->
+<div class="fixed bottom-0 left-0 w-full z-50 bg-white border-t border-outline-variant p-margin-mobile flex justify-center shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
+<div class="max-w-3xl w-full">
+<button class="w-full h-14 bg-primary text-on-primary font-label-md text-lg rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:bg-primary-container hover:text-on-primary-container transition-all active:scale-95 duration-150">
+<span>Save &amp; Continue</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Hidden Grid Item Template Script -->
+<script>
+        const gridContainer = document.getElementById('grid-container');
+        const rowsInput = document.getElementById('rows-input');
+        const colsInput = document.getElementById('cols-input');
+        
+        function updateGrid() {
+            const rows = parseInt(rowsInput.value);
+            const cols = parseInt(colsInput.value);
+            
+            gridContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+            gridContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            
+            // Re-render internal lines for visual effect
+            gridContainer.innerHTML = '';
+            // Only render a few cells to keep performance high if the user puts in 100x100
+            const maxCells = 400; 
+            const totalCells = Math.min(rows * cols, maxCells);
+            
+            for(let i=0; i < totalCells; i++) {
+                const cell = document.createElement('div');
+                cell.className = "border-[0.5px] border-primary/10";
+                gridContainer.appendChild(cell);
+            }
+        }
+
+        // Event listeners for increment/decrement
+        document.getElementById('rows-inc').addEventListener('click', () => { rowsInput.value = parseInt(rowsInput.value) + 1; updateGrid(); });
+        document.getElementById('rows-dec').addEventListener('click', () => { if(rowsInput.value > 1) rowsInput.value = parseInt(rowsInput.value) - 1; updateGrid(); });
+        document.getElementById('cols-inc').addEventListener('click', () => { colsInput.value = parseInt(colsInput.value) + 1; updateGrid(); });
+        document.getElementById('cols-dec').addEventListener('click', () => { if(colsInput.value > 1) colsInput.value = parseInt(colsInput.value) - 1; updateGrid(); });
+        
+        rowsInput.addEventListener('change', updateGrid);
+        colsInput.addEventListener('change', updateGrid);
+
+        // Initial update
+        updateGrid();
+
+        // Micro-interaction for upload area
+        const uploadArea = document.getElementById('upload-area');
+        uploadArea.addEventListener('click', () => {
+            uploadArea.classList.add('bg-primary/5', 'scale-[0.98]');
+            setTimeout(() => {
+                uploadArea.classList.remove('scale-[0.98]');
+            }, 100);
+        });
+    </script>
+</body></html>

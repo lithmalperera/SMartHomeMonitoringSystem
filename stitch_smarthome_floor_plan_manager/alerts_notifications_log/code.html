@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Lumina Home - Alerts</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#eff4ff",
+                    "outline-variant": "#c3c6d7",
+                    "error": "#ba1a1a",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "on-primary-fixed": "#00174b",
+                    "tertiary-container": "#bc4800",
+                    "secondary-fixed-dim": "#c4c7c9",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed": "#360f00",
+                    "on-tertiary": "#ffffff",
+                    "on-surface": "#0b1c30",
+                    "secondary-fixed": "#e0e3e5",
+                    "inverse-surface": "#213145",
+                    "on-error-container": "#93000a",
+                    "secondary": "#5c5f61",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-on-surface": "#eaf1ff",
+                    "surface-dim": "#cbdbf5",
+                    "on-tertiary-fixed-variant": "#7d2d00",
+                    "surface-tint": "#0053db",
+                    "on-tertiary-container": "#ffede6",
+                    "surface": "#f8f9ff",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed-variant": "#444749",
+                    "inverse-primary": "#b4c5ff",
+                    "on-background": "#0b1c30",
+                    "background": "#f8f9ff",
+                    "on-surface-variant": "#434655",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "surface-container-highest": "#d3e4fe",
+                    "outline": "#737686",
+                    "primary-fixed": "#dbe1ff",
+                    "on-primary-container": "#eeefff",
+                    "surface-container": "#e5eeff",
+                    "tertiary-fixed-dim": "#ffb596",
+                    "secondary-container": "#e0e3e5",
+                    "on-error": "#ffffff",
+                    "on-secondary-container": "#626567",
+                    "on-secondary": "#ffffff",
+                    "tertiary": "#943700",
+                    "primary": "#004ac6",
+                    "surface-bright": "#f8f9ff",
+                    "tertiary-fixed": "#ffdbcd",
+                    "surface-container-high": "#dce9ff",
+                    "on-secondary-fixed": "#191c1e",
+                    "surface-variant": "#d3e4fe",
+                    "primary-container": "#2563eb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "gutter-mobile": "12px",
+                    "margin-mobile": "20px",
+                    "md": "16px",
+                    "xl": "32px",
+                    "base": "4px",
+                    "sm": "8px",
+                    "lg": "24px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+        .bento-card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .bento-card:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+        .custom-scrollbar::-webkit-scrollbar { height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-on-surface docked full-width top-0 z-40 border-b border-outline-variant dark:border-outline flex justify-between items-center px-margin-mobile w-full py-sm">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional close-up portrait of a modern homeowner, warm natural lighting, minimalist aesthetic, blurred interior background of a smart home with clean white walls and soft blue accents, high-quality digital photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYjQqAhuPsxqNAQg_64HCGvX7El7JG69FUNYUMwrAf0F0TRDRjgK-FnPGWuCZbOoBPfOTcf1XdX4cbO90gxggAD99jZu6SQq-3vSty9C2uhX0_mLgD1WH-MbhW_ktM4HS5cNp4upP_RynTc2VGjQYlY0_tTy7ZDr6W8Jmq3jIGVvMo3cNZ9xlXaH1NIqoF2uP73cFIb2G5EOqN-soyiv7-vN9yWug0TBYKX9XiwEFTL6V1KeDDqNVK8w"/>
+</div>
+<h1 class="font-headline-md text-headline-md-mobile font-bold text-primary dark:text-primary-fixed-dim">Alerts</h1>
+</div>
+<div class="flex items-center gap-md">
+<button class="hover:bg-surface-container-high dark:hover:bg-surface-variant p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">search</span>
+</button>
+<button class="hover:bg-surface-container-high dark:hover:bg-surface-variant p-2 rounded-full transition-colors relative">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto px-margin-mobile py-lg space-y-xl pb-24">
+<!-- Filter Section -->
+<section>
+<div class="flex items-center justify-between mb-md">
+<h2 class="font-label-md text-label-md text-secondary uppercase tracking-wider">Quick Filters</h2>
+<button class="text-primary font-label-md text-label-md flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm">tune</span>
+                    More
+                </button>
+</div>
+<div class="flex gap-sm overflow-x-auto custom-scrollbar pb-2">
+<button class="flex-shrink-0 bg-primary text-on-primary px-lg py-sm rounded-full font-label-md text-label-md transition-all active:scale-95">All</button>
+<button class="flex-shrink-0 bg-white border border-outline-variant text-on-surface-variant px-lg py-sm rounded-full font-label-md text-label-md hover:bg-surface-container-low transition-all active:scale-95">Unread</button>
+<button class="flex-shrink-0 bg-white border border-outline-variant text-on-surface-variant px-lg py-sm rounded-full font-label-md text-label-md hover:bg-surface-container-low transition-all active:scale-95">Device Type</button>
+<button class="flex-shrink-0 bg-white border border-outline-variant text-on-surface-variant px-lg py-sm rounded-full font-label-md text-label-md hover:bg-surface-container-low transition-all active:scale-95">Critical</button>
+</div>
+</section>
+<!-- Alerts List -->
+<section class="space-y-md">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Recent Activity</h2>
+<span class="text-secondary font-label-sm text-label-sm">3 New Alerts</span>
+</div>
+<!-- Card 1: Critical Warning -->
+<div class="bento-card bg-white rounded-xl p-md flex gap-md items-start border-l-4 border-error">
+<div class="bg-error-container text-on-error-container p-sm rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-label-md text-label-md text-on-surface">Master Iron</h3>
+<span class="text-secondary font-label-sm text-label-sm">2m ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-xs">Max duration exceeded. Auto-shutoff initiated for safety.</p>
+<div class="mt-md flex gap-sm">
+<button class="bg-primary-container text-on-primary-container px-md py-xs rounded-lg font-label-sm text-label-sm hover:opacity-90 transition-opacity">Dismiss</button>
+<button class="bg-surface-container-high text-on-surface px-md py-xs rounded-lg font-label-sm text-label-sm hover:opacity-90 transition-opacity">Details</button>
+</div>
+</div>
+</div>
+<!-- Card 2: Security Alert -->
+<div class="bento-card bg-white rounded-xl p-md flex gap-md items-start border-l-4 border-tertiary">
+<div class="bg-tertiary-fixed text-on-tertiary-fixed p-sm rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">video_camera_front</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-label-md text-label-md text-on-surface">Front Door Camera</h3>
+<span class="text-secondary font-label-sm text-label-sm">15m ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-xs">Motion detected at entrance. Person identified as "Courier".</p>
+<div class="mt-md rounded-lg overflow-hidden h-32 relative group">
+<img class="w-full h-full object-cover" data-alt="A high-definition security camera viewpoint of a modern home porch during the golden hour. A person in a delivery uniform is placing a package near the door. The image has a subtle digital overlay showing motion detection zones in soft blue, clean and high-tech corporate UI style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjObvLF8nPump7o9GDCZohiseeaURPpsT_CMnWk-otmuiqRoO4RnnT8jAoYqO5KSKs9SkbarTLPHTlfye1foX-8JNdSFn3W5Jp1CXe63rgit0E-cMdowG1uLlDTp1_ZyQA83LUBXx6yHGhkG9j1Xa5DARW5DeieWOXNYRF-fOMTtGPErvkn7xic39svHvE4f8m0gTtPHH_67jeLXXcaQGfk3lqaT8DVNd5rmi3Kuq89ya-7QgDgqkIdw"/>
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-3xl">play_circle</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3: Info/Status -->
+<div class="bento-card bg-white rounded-xl p-md flex gap-md items-start border-l-4 border-primary">
+<div class="bg-surface-container-highest text-primary p-sm rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-label-md text-label-md text-on-surface">Living Room Lamp</h3>
+<span class="text-secondary font-label-sm text-label-sm">1h ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-xs">Scheduled ON. Welcome scene activated.</p>
+</div>
+<div class="bg-surface-container text-on-secondary-container px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tighter">System</div>
+</div>
+<!-- Older Notifications Separator -->
+<div class="py-md flex items-center gap-md">
+<div class="h-px flex-1 bg-outline-variant"></div>
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest">Yesterday</span>
+<div class="h-px flex-1 bg-outline-variant"></div>
+</div>
+<!-- Card 4: Routine Update -->
+<div class="bento-card bg-surface-container-lowest opacity-80 rounded-xl p-md flex gap-md items-start">
+<div class="bg-secondary-container text-on-secondary-container p-sm rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">schedule</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-label-md text-label-md text-on-surface">Night Routine</h3>
+<span class="text-secondary font-label-sm text-label-sm">22:00</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-xs">All doors locked. Security system armed to Stay mode.</p>
+</div>
+</div>
+</section>
+<!-- Empty State Logic Placeholder (Invisible but structured for potential JS) -->
+<div class="hidden flex-col items-center justify-center py-xl text-center space-y-md" id="empty-state">
+<span class="material-symbols-outlined text-6xl text-outline-variant">notifications_off</span>
+<div>
+<p class="font-headline-sm text-headline-sm text-on-surface">All clear!</p>
+<p class="font-body-md text-body-md text-secondary">No new alerts for your home.</p>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter-mobile pb-safe bg-surface dark:bg-on-surface h-16 border-t border-outline-variant dark:border-outline">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant py-1 hover:bg-surface-container-low dark:hover:bg-inverse-surface transition-all active:scale-90 duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant py-1 hover:bg-surface-container-low dark:hover:bg-inverse-surface transition-all active:scale-90 duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">layers</span>
+<span class="font-label-sm text-label-sm">Floor</span>
+</a>
+<!-- Active State: Alerts -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-full px-4 py-1 transition-all active:scale-90 duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">notifications_active</span>
+<span class="font-label-sm text-label-sm">Alerts</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant py-1 hover:bg-surface-container-low dark:hover:bg-inverse-surface transition-all active:scale-90 duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">insert_chart</span>
+<span class="font-label-sm text-label-sm">Usage</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant py-1 hover:bg-surface-container-low dark:hover:bg-inverse-surface transition-all active:scale-90 duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+</nav>
+<script>
+        // Micro-interactions for buttons and filters
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('mousedown', () => {
+                button.classList.add('scale-95');
+            });
+            button.addEventListener('mouseup', () => {
+                button.classList.remove('scale-95');
+            });
+            button.addEventListener('mouseleave', () => {
+                button.classList.remove('scale-95');
+            });
+        });
+
+        // Simple filter toggle demo
+        const filterButtons = document.querySelectorAll('section:first-of-type button');
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.textContent !== 'More') {
+                    filterButtons.forEach(b => {
+                        b.classList.remove('bg-primary', 'text-on-primary');
+                        b.classList.add('bg-white', 'text-on-surface-variant', 'border', 'border-outline-variant');
+                    });
+                    btn.classList.remove('bg-white', 'text-on-surface-variant', 'border', 'border-outline-variant');
+                    btn.classList.add('bg-primary', 'text-on-primary');
+                }
+            });
+        });
+    </script>
+</body></html>

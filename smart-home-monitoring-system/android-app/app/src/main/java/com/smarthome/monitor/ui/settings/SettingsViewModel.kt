@@ -4,7 +4,10 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-data class SettingsUiState(val text: String = "Settings coming soon")
+data class SettingsUiState(
+    val isLoading: Boolean = false,
+    val text: String = "Settings coming soon"
+)
 
 class SettingsViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Add New Device | Lumina Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .grid-mesh {
+            background-size: 40px 40px;
+            background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
+        }
+        .active-cell {
+            animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(0, 74, 198, 1); background-color: rgba(0, 74, 198, 0.1); }
+            50% { border-color: rgba(0, 74, 198, 0.3); background-color: transparent; }
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-low": "#eff4ff",
+                      "outline-variant": "#c3c6d7",
+                      "error": "#ba1a1a",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "on-primary-fixed": "#00174b",
+                      "tertiary-container": "#bc4800",
+                      "secondary-fixed-dim": "#c4c7c9",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed": "#360f00",
+                      "on-tertiary": "#ffffff",
+                      "on-surface": "#0b1c30",
+                      "secondary-fixed": "#e0e3e5",
+                      "inverse-surface": "#213145",
+                      "on-error-container": "#93000a",
+                      "secondary": "#5c5f61",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "surface-dim": "#cbdbf5",
+                      "on-tertiary-fixed-variant": "#7d2d00",
+                      "surface-tint": "#0053db",
+                      "on-tertiary-container": "#ffede6",
+                      "surface": "#f8f9ff",
+                      "on-primary": "#ffffff",
+                      "on-secondary-fixed-variant": "#444749",
+                      "inverse-primary": "#b4c5ff",
+                      "on-background": "#0b1c30",
+                      "background": "#f8f9ff",
+                      "on-surface-variant": "#434655",
+                      "on-primary-fixed-variant": "#003ea8",
+                      "surface-container-highest": "#d3e4fe",
+                      "outline": "#737686",
+                      "primary-fixed": "#dbe1ff",
+                      "on-primary-container": "#eeefff",
+                      "surface-container": "#e5eeff",
+                      "tertiary-fixed-dim": "#ffb596",
+                      "secondary-container": "#e0e3e5",
+                      "on-error": "#ffffff",
+                      "on-secondary-container": "#626567",
+                      "on-secondary": "#ffffff",
+                      "tertiary": "#943700",
+                      "primary": "#004ac6",
+                      "surface-bright": "#f8f9ff",
+                      "tertiary-fixed": "#ffdbcd",
+                      "surface-container-high": "#dce9ff",
+                      "on-secondary-fixed": "#191c1e",
+                      "surface-variant": "#d3e4fe",
+                      "primary-container": "#2563eb"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "gutter-mobile": "12px",
+                      "margin-mobile": "20px",
+                      "md": "16px",
+                      "xl": "32px",
+                      "base": "4px",
+                      "sm": "8px",
+                      "lg": "24px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "headline-sm": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "label-md": ["Inter"],
+                      "headline-md": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+<!-- Top Navigation Anchor -->
+<nav class="sticky top-0 z-50 bg-surface flex justify-between items-center px-margin-mobile w-full py-sm border-b border-outline-variant">
+<div class="flex items-center gap-3">
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container-high transition-transform active:scale-95 duration-150">
+<span class="material-symbols-outlined text-secondary">close</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm-mobile font-bold text-primary">Add New Device</h1>
+</div>
+<button class="font-label-md text-label-md text-primary px-4 py-2 hover:bg-surface-container-high rounded-full transition-all">
+            Help
+        </button>
+</nav>
+<main class="max-w-screen-md mx-auto px-margin-mobile pt-lg space-y-xl">
+<!-- Device Type Selector Section -->
+<section class="space-y-md">
+<h2 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Select Device Type</h2>
+<div class="flex overflow-x-auto gap-md pb-xs hide-scrollbar snap-x">
+<!-- Outlet -->
+<button class="device-type-chip snap-start flex flex-col items-center justify-center min-w-[84px] h-24 bg-white border border-outline-variant rounded-xl shadow-sm transition-all active:scale-95 group border-primary bg-primary-container/10" onclick="selectType(this, 'outlet')">
+<span class="material-symbols-outlined text-3xl mb-1 text-primary">outlet</span>
+<span class="font-label-sm text-label-sm text-primary">Outlet</span>
+</button>
+<!-- Multi-Switch -->
+<button class="device-type-chip snap-start flex flex-col items-center justify-center min-w-[84px] h-24 bg-white border border-outline-variant rounded-xl shadow-sm transition-all active:scale-95 group" onclick="selectType(this, 'toggle_on')">
+<span class="material-symbols-outlined text-3xl mb-1 text-secondary group-hover:text-primary transition-colors">toggle_on</span>
+<span class="font-label-sm text-label-sm text-secondary group-hover:text-primary">Switch</span>
+</button>
+<!-- Iron -->
+<button class="device-type-chip snap-start flex flex-col items-center justify-center min-w-[84px] h-24 bg-white border border-outline-variant rounded-xl shadow-sm transition-all active:scale-95 group" onclick="selectType(this, 'iron')">
+<span class="material-symbols-outlined text-3xl mb-1 text-secondary group-hover:text-primary transition-colors">iron</span>
+<span class="font-label-sm text-label-sm text-secondary group-hover:text-primary">Iron</span>
+</button>
+<!-- Bulb -->
+<button class="device-type-chip snap-start flex flex-col items-center justify-center min-w-[84px] h-24 bg-white border border-outline-variant rounded-xl shadow-sm transition-all active:scale-95 group" onclick="selectType(this, 'lightbulb')">
+<span class="material-symbols-outlined text-3xl mb-1 text-secondary group-hover:text-primary transition-colors">lightbulb</span>
+<span class="font-label-sm text-label-sm text-secondary group-hover:text-primary">Bulb</span>
+</button>
+<!-- Camera -->
+<button class="device-type-chip snap-start flex flex-col items-center justify-center min-w-[84px] h-24 bg-white border border-outline-variant rounded-xl shadow-sm transition-all active:scale-95 group" onclick="selectType(this, 'videocam')">
+<span class="material-symbols-outlined text-3xl mb-1 text-secondary group-hover:text-primary transition-colors">videocam</span>
+<span class="font-label-sm text-label-sm text-secondary group-hover:text-primary">Camera</span>
+</button>
+</div>
+</section>
+<!-- Device Name Input -->
+<section class="space-y-md">
+<h2 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Device Name</h2>
+<div class="relative">
+<input class="w-full bg-white border border-outline-variant rounded-xl px-4 py-4 font-body-md text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-sm" placeholder="e.g. Living Room Lamp" type="text"/>
+<span class="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline-variant">edit</span>
+</div>
+</section>
+<!-- Grid-tap Placement Preview -->
+<section class="space-y-md">
+<div class="flex justify-between items-end">
+<h2 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Placement</h2>
+<span class="font-label-sm text-label-sm text-primary animate-pulse">Tap a cell to place device</span>
+</div>
+<div class="relative w-full aspect-square bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant shadow-inner grid-mesh p-sm">
+<!-- Floor Plan Background Layer -->
+<div class="absolute inset-0 z-0 opacity-40 mix-blend-multiply bg-center bg-no-repeat bg-contain" data-alt="A clean, professional 2D architectural blueprint floor plan of a modern minimalist apartment. The illustration features light gray lines on a subtle off-white background, highlighting room divisions like the living room, kitchen, and bedroom. The style is technical yet elegant, perfectly aligned with a high-end smart home management interface. Lighting is even and neutral." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA4--wt_65t6wd5glphOTFhNQzJrZmr8lDnoaBlm6byIhdQbg9oxd0sww1D5VG6wloi3Yll7zItHcBi114vPm02i5KoOQkZlbA_VPXdEvh7OHaIPU_D4m2VR6khbK70NL0Nz-XF6eOsx_3kYm6K5sliDQZt2QKQEUitu5tKzDn97pYzU0mTKZFlPsSZK5XzILOA-KtgOdeXcOViY3vZRIHbgh7rah4h2M9wxUl8r4FcB3hWwVptth0olA')"></div>
+<!-- Interactive Grid Overlay -->
+<div class="relative z-10 grid grid-cols-8 grid-rows-8 w-full h-full gap-1" id="placement-grid">
+<!-- Grid cells generated by JS or static for demo -->
+<!-- Repeat 64 times for 8x8 grid -->
+<script>
+                        const grid = document.getElementById('placement-grid');
+                        let selectedCell = null;
+                        let activeIcon = 'outlet';
+
+                        for(let i=0; i<64; i++) {
+                            const cell = document.createElement('div');
+                            cell.className = 'border border-transparent rounded-sm hover:bg-primary/5 transition-colors cursor-pointer flex items-center justify-center';
+                            cell.onclick = () => {
+                                if(selectedCell) {
+                                    selectedCell.innerHTML = '';
+                                    selectedCell.classList.remove('active-cell', 'border-primary', 'bg-white');
+                                }
+                                selectedCell = cell;
+                                cell.classList.add('active-cell', 'border-primary', 'bg-white', 'shadow-md');
+                                cell.innerHTML = `<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">${activeIcon}</span>`;
+                            };
+                            grid.appendChild(cell);
+                        }
+
+                        function selectType(el, icon) {
+                            // Reset all chips
+                            document.querySelectorAll('.device-type-chip').forEach(chip => {
+                                chip.classList.remove('border-primary', 'bg-primary-container/10');
+                                chip.querySelector('.material-symbols-outlined').classList.replace('text-primary', 'text-secondary');
+                                chip.querySelector('span:last-child').classList.replace('text-primary', 'text-secondary');
+                            });
+                            // Set active chip
+                            el.classList.add('border-primary', 'bg-primary-container/10');
+                            el.querySelector('.material-symbols-outlined').classList.replace('text-secondary', 'text-primary');
+                            el.querySelector('span:last-child').classList.replace('text-secondary', 'text-primary');
+                            
+                            activeIcon = icon;
+                            // Update icon on grid if one is selected
+                            if(selectedCell) {
+                                selectedCell.innerHTML = `<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">${activeIcon}</span>`;
+                            }
+                        }
+                    </script>
+</div>
+</div>
+<p class="font-label-sm text-label-sm text-outline text-center">Precise placement helps with localized automation and context-aware controls.</p>
+</section>
+</main>
+<!-- Save Device Button (Sticky) -->
+<div class="fixed bottom-0 left-0 w-full bg-surface/80 backdrop-blur-md px-margin-mobile py-lg border-t border-outline-variant/30 z-50">
+<div class="max-w-screen-md mx-auto">
+<button class="w-full bg-primary text-on-primary font-label-md text-label-md py-4 rounded-xl shadow-lg hover:bg-primary-container transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">save</span>
+                Save Device
+            </button>
+</div>
+</div>
+<!-- Hidden Bottom Nav (as per standard components, but suppressed for task-focus as per instructions) -->
+<!-- The "Relevance Check" in system instructions says: Suppress the navigation shell if the page intent is Task-Focused/Close/Back. -->
+</body></html>
