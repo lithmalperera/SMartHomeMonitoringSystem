@@ -4,10 +4,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -35,6 +35,11 @@ fun HomeScreen(
                     TextButton(onClick = onSettingsClick) { Text("Settings") }
                 }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { viewModel.showAddFloorDialog(true) }) {
+                Icon(Icons.Filled.Add, contentDescription = "Add Floor")
+            }
         }
     ) { padding ->
         when {
@@ -47,11 +52,31 @@ fun HomeScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(uiState.floors) { floor ->
+                if (uiState.alerts.isNotEmpty()) {
+                    item {
+                        Text("Safety Alerts", fontSize = 14.sp, color = MaterialTheme.colorScheme.error)
+                    }
+                    items(uiState.alerts) { alert ->
+                        AssistChip(
+                            onClick = { onFloorClick("floor_ground") },
+                            label = { Text("⚠ ${alert.deviceName} ON for ${alert.onMinutes} min") },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer
+                            )
+                        )
+                    }
+                    item { Spacer(Modifier.height(8.dp)) }
+                }
+
+                item {
+                    Text("Floors", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+
+                items(uiState.floors) { summary ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onFloorClick(floor.id) },
+                            .clickable { onFloorClick(summary.floor.id) },
                         elevation = CardDefaults.cardElevation(2.dp)
                     ) {
                         Row(
@@ -61,12 +86,37 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(text = floor.name, fontSize = 18.sp)
-                            Text(text = "\u203A", fontSize = 24.sp)
+                            Column {
+                                Text(summary.floor.name, fontSize = 18.sp)
+                                Text(
+                                    "${summary.deviceCount} devices · ${summary.onCount} ON",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Text("\u203A", fontSize = 24.sp)
                         }
                     }
                 }
             }
         }
+    }
+
+    if (uiState.showAddFloorDialog) {
+        var name by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { viewModel.showAddFloorDialog(false) },
+            title = { Text("Add Floor") },
+            text = {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Floor name") },
+                    singleLine = true
+                )
+            },
+            confirmButton = { TextButton(onClick = { viewModel.addFloor(name) }) { Text("Add") } },
+            dismissButton = { TextButton(onClick = { viewModel.showAddFloorDialog(false) }) { Text("Cancel") } }
+        )
     }
 }

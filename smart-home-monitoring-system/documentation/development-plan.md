@@ -8,7 +8,7 @@ week's scope is cut, never the milestone's demo quality.
 ## 1. Team Roles
 
 | Member | Primary ownership | Secondary |
-|---|---|---|
+|---|---|---|m.l;pl''''''''''''];;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;//////////////////////
 | **A — Android UI** | All screens, shared components, theme, navigation | Camera + reports screens polish |
 | **B — Data & Backend** | Android data layer (models, data sources, repos), Firebase setup, Cloud Functions, FCM | Security rules, seed data |
 | **C — Simulator & Docs** | Hardware simulator (all of it), documentation upkeep, test/demo data, demo video editing | Manual QA across app |

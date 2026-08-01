@@ -17,12 +17,13 @@ import com.smarthome.monitor.data.model.Device
 fun DeviceCard(device: Device, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
-            .size(width = 140.dp, height = 100.dp)
+            .fillMaxWidth()
+            .height(96.dp)
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.fillMaxSize().padding(8.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(text = device.name, fontSize = 13.sp, maxLines = 1)
