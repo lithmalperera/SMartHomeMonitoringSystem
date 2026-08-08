@@ -37,8 +37,8 @@ import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.outlined.DoorSliding
 import androidx.compose.material.icons.outlined.Lightbulb
-import androidx.compose.material.icons.outlined.NotificationsOff
 import androidx.compose.material.icons.outlined.Power
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,13 +60,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.smarthome.monitor.R
 import com.smarthome.monitor.data.model.Floor
 import com.smarthome.monitor.ui.components.BottomNavBar
 import com.smarthome.monitor.ui.components.BottomNavItem
 import com.smarthome.monitor.ui.components.LoadingBox
 import com.smarthome.monitor.ui.components.ProfileAvatar
+import coil.compose.AsyncImage
+
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 @Composable
 fun HomeScreen(
@@ -76,10 +81,11 @@ fun HomeScreen(
     onAlertsClick: () -> Unit,
     onUsageClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    viewModel: HomeViewModel = viewModel()
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val selectedNav = BottomNavItem.HOME
+    var showAllActivities by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -113,6 +119,12 @@ fun HomeScreen(
                 uiState = uiState,
                 onFloorSelected = onFloorSelected,
                 onAddFloor = onAddFloor,
+                showAllActivities = showAllActivities,
+                onViewAllActivities = { showAllActivities = true },
+                onAllLightsOn = { viewModel.turnAllLights(true) },
+                onAllLightsOff = { viewModel.turnAllLights(false) },
+                onAllElectricalOff = { viewModel.turnAllElectricalDevicesOff() },
+                onEmergencyOff = { viewModel.emergencyOff() },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
@@ -176,6 +188,12 @@ private fun HomeContent(
     uiState: HomeUiState,
     onFloorSelected: (String) -> Unit,
     onAddFloor: () -> Unit,
+    showAllActivities: Boolean,
+    onViewAllActivities: () -> Unit,
+    onAllLightsOn: () -> Unit,
+    onAllLightsOff: () -> Unit,
+    onAllElectricalOff: () -> Unit,
+    onEmergencyOff: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -196,9 +214,18 @@ private fun HomeContent(
             onAddFloor = onAddFloor
         )
         
-        QuickActionsSection()
+        QuickActionsSection(
+            onAllLightsOn = onAllLightsOn,
+            onAllLightsOff = onAllLightsOff,
+            onAllElectricalOff = onAllElectricalOff,
+            onEmergencyOff = onEmergencyOff
+        )
         
-        RecentActivitySection(activities = uiState.recentActivities)
+        RecentActivitySection(
+            activities = uiState.recentActivities,
+            showAll = showAllActivities,
+            onViewAllClick = onViewAllActivities
+        )
     }
 }
 
@@ -370,10 +397,14 @@ private fun FloorsSection(
 
 @Composable
 private fun FloorListItem(floor: Floor, onClick: () -> Unit) {
-    val imageRes = when (floor.name) {
-        "Ground Floor" -> R.drawable.ground_floor
-        "First Floor" -> R.drawable.first_floor
-        "Garage" -> R.drawable.garage
+    val floorNameLower = floor.name.lowercase()
+    val imageRes = when {
+        floorNameLower.contains("ground") -> R.drawable.ground_floor
+        floorNameLower.contains("first") || floorNameLower.contains("1st") -> R.drawable.first_floor
+        floorNameLower.contains("second") || floorNameLower.contains("2nd") -> R.drawable.second_floor
+        floorNameLower.contains("third") || floorNameLower.contains("3rd") -> R.drawable.third_floor
+        floorNameLower.contains("basement") -> R.drawable.basement
+        floorNameLower.contains("garage") -> R.drawable.garage
         else -> null
     }
 
@@ -381,68 +412,111 @@ private fun FloorListItem(floor: Floor, onClick: () -> Unit) {
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         color = Color.White,
-        shadowElevation = 1.dp
+        shadowElevation = 2.dp,
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (imageRes != null) {
-                Image(
-                    painter = painterResource(id = imageRes),
-                    contentDescription = floor.name,
-                    modifier = Modifier.size(80.dp, 60.dp).clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier.size(80.dp, 60.dp).clip(RoundedCornerShape(8.dp)).background(Color(0xFFF5F5F5)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(Icons.Default.Architecture, contentDescription = null, tint = Color.LightGray)
+            Box(
+                modifier = Modifier
+                    .size(width = 90.dp, height = 70.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFF5F5F5)),
+                contentAlignment = Alignment.Center
+            ) {
+                val hasCustomImage = !floor.imageUrl.isNullOrBlank()
+                
+                if (hasCustomImage) {
+                    AsyncImage(
+                        model = floor.imageUrl,
+                        contentDescription = floor.name,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(id = imageRes ?: R.drawable.ground_floor) // Fallback if image fails to load
+                    )
+                } else if (imageRes != null) {
+                    Image(
+                        painter = painterResource(id = imageRes),
+                        contentDescription = floor.name,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Architecture,
+                        contentDescription = null,
+                        tint = Color.LightGray,
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = floor.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(
+                        text = floor.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1A1A1A)
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
+                    
+                    val isOffline = floorNameLower.contains("garage") || floorNameLower.contains("basement")
                     Surface(
-                        color = if (floor.name == "Garage") Color(0xFFFFF3E0) else Color(0xFFE8F5E9),
+                        color = if (isOffline) Color(0xFFFFF3E0) else Color(0xFFE8F5E9),
                         shape = RoundedCornerShape(4.dp)
                     ) {
                         Text(
-                            text = if (floor.name == "Garage") "• Offline" else "• Online",
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                            fontSize = 10.sp,
-                            color = if (floor.name == "Garage") Color(0xFFFF9800) else Color(0xFF4CAF50),
+                            text = if (isOffline) "• Offline" else "• Online",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                            fontSize = 11.sp,
+                            color = if (isOffline) Color(0xFFFF9800) else Color(0xFF4CAF50),
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Lightbulb, contentDescription = null, Modifier.size(14.dp), tint = Color.Gray)
+                    Icon(
+                        imageVector = Icons.Default.Lightbulb,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = Color.Gray
+                    )
                     Spacer(modifier = Modifier.width(4.dp))
-                    val deviceCount = when (floor.name) {
-                        "Ground Floor" -> 12
-                        "First Floor" -> 8
-                        else -> 4
+                    val deviceCount = when {
+                        floorNameLower.contains("ground") -> 12
+                        floorNameLower.contains("first") -> 8
+                        floorNameLower.contains("garage") -> 4
+                        else -> 6
                     }
                     Text(
                         text = "$deviceCount Devices",
-                        fontSize = 12.sp,
+                        fontSize = 13.sp,
                         color = Color.Gray
                     )
                 }
             }
-            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.LightGray)
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = Color(0xFFD0D0D0)
+            )
         }
     }
 }
 
 @Composable
-private fun QuickActionsSection() {
+private fun QuickActionsSection(
+    onAllLightsOn: () -> Unit,
+    onAllLightsOff: () -> Unit,
+    onAllElectricalOff: () -> Unit,
+    onEmergencyOff: () -> Unit
+) {
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         Text("Quick Actions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(12.dp))
@@ -450,17 +524,18 @@ private fun QuickActionsSection() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            QuickActionButton(icon = Icons.Outlined.Lightbulb, label = "All Lights On", color = Color(0xFF4CAF50), modifier = Modifier.weight(1f))
-            QuickActionButton(icon = Icons.Outlined.Lightbulb, label = "All Lights Off", color = Color(0xFFFF9800), modifier = Modifier.weight(1f))
-            QuickActionButton(icon = Icons.Outlined.Power, label = "All Electrical\nDevices Off", color = Color(0xFF2196F3), modifier = Modifier.weight(1f))
-            QuickActionButton(icon = Icons.Outlined.NotificationsOff, label = "All Alerts\nMuted", color = Color(0xFF9C27B0), modifier = Modifier.weight(1f))
+            QuickActionButton(icon = Icons.Outlined.Lightbulb, label = "All Lights On", color = Color(0xFF4CAF50), onClick = onAllLightsOn, modifier = Modifier.weight(1f))
+            QuickActionButton(icon = Icons.Outlined.Lightbulb, label = "All Lights Off", color = Color(0xFFFF9800), onClick = onAllLightsOff, modifier = Modifier.weight(1f))
+            QuickActionButton(icon = Icons.Outlined.Power, label = "All Electrical\nDevices Off", color = Color(0xFF2196F3), onClick = onAllElectricalOff, modifier = Modifier.weight(1f))
+            QuickActionButton(icon = Icons.Outlined.Warning, label = "Emergency\nOFF", color = Color.Red, onClick = onEmergencyOff, modifier = Modifier.weight(1f))
         }
     }
 }
 
 @Composable
-private fun QuickActionButton(icon: ImageVector, label: String, color: Color, modifier: Modifier) {
+private fun QuickActionButton(icon: ImageVector, label: String, color: Color, onClick: () -> Unit, modifier: Modifier) {
     Surface(
+        onClick = onClick,
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
         color = Color.White,
@@ -493,7 +568,13 @@ private fun QuickActionButton(icon: ImageVector, label: String, color: Color, mo
 }
 
 @Composable
-private fun RecentActivitySection(activities: List<RecentActivity>) {
+private fun RecentActivitySection(
+    activities: List<RecentActivity>,
+    showAll: Boolean,
+    onViewAllClick: () -> Unit
+) {
+    val displayedActivities = if (showAll) activities else activities.take(5)
+
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -510,30 +591,33 @@ private fun RecentActivitySection(activities: List<RecentActivity>) {
             shadowElevation = 1.dp
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                activities.forEachIndexed { index, activity ->
+                displayedActivities.forEachIndexed { index, activity ->
                     ActivityItem(activity = activity)
-                    if (index < activities.size - 1) {
+                    if (index < displayedActivities.size - 1) {
                         Spacer(modifier = Modifier.height(12.dp))
                         Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFF5F5F5)))
                         Spacer(modifier = Modifier.height(12.dp))
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                Surface(
-                    onClick = { /* View All */ },
-                    shape = RoundedCornerShape(8.dp),
-                    color = Color.Transparent,
-                    border = BorderStroke(1.dp, Color(0xFFF0F0F0)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "View All Activity",
-                        modifier = Modifier.padding(vertical = 12.dp),
-                        textAlign = TextAlign.Center,
-                        color = Color(0xFF0047AB),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
-                    )
+                
+                if (!showAll && activities.size > 5) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Surface(
+                        onClick = onViewAllClick,
+                        shape = RoundedCornerShape(8.dp),
+                        color = Color.Transparent,
+                        border = BorderStroke(1.dp, Color(0xFFF0F0F0)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "View All Activity",
+                            modifier = Modifier.padding(vertical = 12.dp),
+                            textAlign = TextAlign.Center,
+                            color = Color(0xFF0047AB),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
             }
         }

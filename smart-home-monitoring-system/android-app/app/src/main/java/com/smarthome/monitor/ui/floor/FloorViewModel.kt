@@ -1,83 +1,71 @@
 package com.smarthome.monitor.ui.floor
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import androidx.lifecycle.viewModelScope
 import com.smarthome.monitor.data.model.Device
-import com.smarthome.monitor.data.model.DeviceState
 import com.smarthome.monitor.data.model.DeviceType
 import com.smarthome.monitor.data.model.GridPosition
+import com.smarthome.monitor.domain.repository.DeviceRepository
+import com.smarthome.monitor.domain.repository.FloorRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class FloorUiState(
     val isLoading: Boolean = true,
     val floorName: String = "",
+    val imageUrl: String? = null,
     val devices: List<Device> = emptyList(),
     val alertsCount: Int = 0
 )
 
-class FloorViewModel : ViewModel() {
+@HiltViewModel
+class FloorViewModel @Inject constructor(
+    private val floorRepository: FloorRepository,
+    private val deviceRepository: DeviceRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(FloorUiState())
     val uiState: StateFlow<FloorUiState> = _uiState
 
     fun loadFloor(floorId: String) {
-        val floorName = when (floorId) {
-            "floor_ground" -> "Ground Floor"
-            "floor_first" -> "1st Floor"
-            "floor_basement" -> "Basement"
-            "floor_outdoor" -> "Outdoor"
-            else -> "Floor"
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+
+            combine(
+                floorRepository.observeFloors(),
+                deviceRepository.observeDevices()
+            ) { floors, devices ->
+                val floor = floors.find { it.id == floorId }
+                val floorDevices = devices.filter { it.floorId == floorId }
+
+                if (floor != null) {
+                    FloorUiState(
+                        isLoading = false,
+                        floorName = floor.name,
+                        imageUrl = floor.imageUrl,
+                        devices = floorDevices,
+                        alertsCount = floorDevices.count { it.state.error }
+                    )
+                } else {
+                    val mockName = when (floorId) {
+                        "floor_ground" -> "Ground Floor"
+                        "floor_first" -> "1st Floor"
+                        "floor_basement" -> "Basement"
+                        else -> "Floor"
+                    }
+                    FloorUiState(
+                        isLoading = false,
+                        floorName = mockName,
+                        devices = emptyList(),
+                        alertsCount = 0
+                    )
+                }
+            }.collect { newState ->
+                _uiState.value = newState
+            }
         }
-        _uiState.value = FloorUiState(
-            isLoading = false,
-            floorName = floorName,
-            devices = listOf(
-                Device(
-                    id = "dev_light_living",
-                    name = "Living Room",
-                    type = DeviceType.LIGHT,
-                    floorId = floorId,
-                    room = "Living Room",
-                    position = GridPosition(3, 2),
-                    state = DeviceState(isOn = true)
-                ),
-                Device(
-                    id = "dev_outlet_coffee",
-                    name = "Coffee Maker",
-                    type = DeviceType.OUTLET,
-                    floorId = floorId,
-                    room = "Kitchen",
-                    position = GridPosition(1, 1),
-                    state = DeviceState(isOn = false)
-                ),
-                Device(
-                    id = "dev_iron_master",
-                    name = "Master Iron",
-                    type = DeviceType.IRON,
-                    floorId = floorId,
-                    room = "Master Bedroom",
-                    position = GridPosition(6, 4),
-                    state = DeviceState(isOn = true, error = true)
-                ),
-                Device(
-                    id = "dev_outlet_air",
-                    name = "Air Purifier",
-                    type = DeviceType.OUTLET,
-                    floorId = floorId,
-                    room = "Hallway",
-                    position = GridPosition(2, 4),
-                    state = DeviceState(isOn = true)
-                ),
-                Device(
-                    id = "dev_cam_entry",
-                    name = "Entry Cam",
-                    type = DeviceType.CAMERA,
-                    floorId = floorId,
-                    room = "Entry",
-                    position = GridPosition(0, 6),
-                    state = DeviceState(isOn = true)
-                )
-            ),
-            alertsCount = 2
-        )
     }
 }

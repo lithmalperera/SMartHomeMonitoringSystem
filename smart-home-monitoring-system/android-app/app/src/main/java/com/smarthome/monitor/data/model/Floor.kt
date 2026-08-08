@@ -5,5 +5,6 @@ data class Floor(
     val name: String = "",
     val order: Int = 0,
     val gridColumns: Int = 4,
-    val gridRows: Int = 4
+    val gridRows: Int = 4,
+    val imageUrl: String? = null
 )

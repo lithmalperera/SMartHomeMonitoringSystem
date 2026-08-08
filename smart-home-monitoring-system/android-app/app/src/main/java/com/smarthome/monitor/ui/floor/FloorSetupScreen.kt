@@ -42,9 +42,14 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -55,14 +60,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import androidx.hilt.navigation.compose.hiltViewModel
+
 @Composable
 fun FloorSetupScreen(
     onBack: () -> Unit,
-    onSave: () -> Unit
+    onSave: () -> Unit,
+    viewModel: FloorSetupViewModel = hiltViewModel()
 ) {
     var floorName by remember { mutableStateOf("Ground Floor") }
     var rows by remember { mutableIntStateOf(12) }
     var cols by remember { mutableIntStateOf(12) }
+    var imageUrl by remember { mutableStateOf<String?>(null) }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        imageUrl = uri?.toString()
+    }
 
     val primaryBlue = Color(0xFF0047AB)
 
@@ -100,7 +115,9 @@ fun FloorSetupScreen(
                 shadowElevation = 8.dp
             ) {
                 Button(
-                    onClick = onSave,
+                    onClick = {
+                        viewModel.saveFloor(floorName, rows, cols, imageUrl, onSuccess = onSave)
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 16.dp)
@@ -169,7 +186,11 @@ fun FloorSetupScreen(
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1A1A1A)
                 )
-                UploadArea(modifier = Modifier.fillMaxWidth())
+                UploadArea(
+                    imageUrl = imageUrl,
+                    onUploadClick = { imagePickerLauncher.launch("image/*") },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
             // Grid Configuration Section
@@ -211,10 +232,14 @@ fun FloorSetupScreen(
 }
 
 @Composable
-private fun UploadArea(modifier: Modifier = Modifier) {
+private fun UploadArea(
+    imageUrl: String?,
+    onUploadClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val strokeColor = Color(0xFFD0D0D0)
     Surface(
-        onClick = { },
+        onClick = onUploadClick,
         shape = RoundedCornerShape(12.dp),
         color = Color(0xFFF5F8FF),
         modifier = modifier
@@ -230,30 +255,41 @@ private fun UploadArea(modifier: Modifier = Modifier) {
                 )
             }
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.CloudUpload,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = Color(0xFF0047AB)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "Upload blueprint (SVG, PNG, JPG)",
-                color = Color(0xFF0047AB),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Max file size 5MB",
-                color = Color.Gray,
-                fontSize = 12.sp
-            )
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+            if (imageUrl != null) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "Selected floor plan blueprint",
+                    modifier = Modifier.fillMaxSize().padding(8.dp).clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Fit
+                )
+            } else {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CloudUpload,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        tint = Color(0xFF0047AB)
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "Upload blueprint (SVG, PNG, JPG)",
+                        color = Color(0xFF0047AB),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Max file size 5MB",
+                        color = Color.Gray,
+                        fontSize = 12.sp
+                    )
+                }
+            }
         }
     }
 }

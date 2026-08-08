@@ -41,7 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.smarthome.monitor.core.util.DeviceStatus
 import com.smarthome.monitor.core.util.status
 import com.smarthome.monitor.data.model.Device
@@ -50,6 +50,9 @@ import com.smarthome.monitor.ui.components.BottomNavItem
 import com.smarthome.monitor.ui.components.DeviceIcon
 import com.smarthome.monitor.ui.components.LoadingBox
 import com.smarthome.monitor.ui.components.ProfileAvatar
+
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 
 @Composable
 fun FloorScreen(
@@ -60,7 +63,7 @@ fun FloorScreen(
     onAlertsClick: () -> Unit,
     onUsageClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    viewModel: FloorViewModel = viewModel()
+    viewModel: FloorViewModel = hiltViewModel()
 ) {
     LaunchedEffect(floorId) { viewModel.loadFloor(floorId) }
     val uiState by viewModel.uiState.collectAsState()
@@ -103,6 +106,7 @@ fun FloorScreen(
         when {
             uiState.isLoading -> LoadingBox(modifier = Modifier.padding(padding))
             else -> FloorCanvas(
+                imageUrl = uiState.imageUrl,
                 devices = uiState.devices,
                 onDeviceClick = onDeviceClick,
                 modifier = Modifier
@@ -190,6 +194,7 @@ private fun FloorTopBar(
 
 @Composable
 private fun FloorCanvas(
+    imageUrl: String?,
     devices: List<Device>,
     onDeviceClick: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -199,21 +204,7 @@ private fun FloorCanvas(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
     ) {
-        // Grid dots
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                            Color.Transparent
-                        ),
-                        radius = 2f
-                    )
-                )
-        )
-        // Floor plan placeholder
+        // 1. Floor plan image (BOTTOM LAYER)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -229,27 +220,72 @@ private fun FloorCanvas(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Architecture,
-                    contentDescription = "Floor plan",
-                    modifier = Modifier.size(120.dp),
-                    tint = MaterialTheme.colorScheme.outlineVariant
-                )
-                devices.forEach { device ->
-                    // deterministic placement for demo
-                    val x = ((device.position.x + 1) * 0.12f).coerceIn(0.05f, 0.9f)
-                    val y = ((device.position.y + 1) * 0.12f).coerceIn(0.05f, 0.9f)
-                    DeviceNode(
-                        device = device,
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .offset(
-                                x = (x * 100).dp,
-                                y = (y * 100).dp
-                            )
-                            .clickable { onDeviceClick(device.id) }
+                if (!imageUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = "Floor plan",
+                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(24.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Architecture,
+                        contentDescription = "Floor plan",
+                        modifier = Modifier.size(120.dp),
+                        tint = MaterialTheme.colorScheme.outlineVariant
                     )
                 }
+            }
+        }
+
+        // 2. Grid dots & Blue Dimmer (MIDDLE LAYER)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            Color(0xFF0047AB).copy(alpha = 0.1f), // Blue dimmer tint
+                            Color.Transparent
+                        ),
+                        radius = 3000f // Large radius for a soft dimmer effect
+                    )
+                )
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
+                            Color.Transparent
+                        ),
+                        radius = 3f
+                    )
+                )
+        )
+
+        // 3. Devices (TOP LAYER)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+        ) {
+            devices.forEach { device ->
+                // deterministic placement for demo
+                val x = ((device.position.x + 1) * 0.12f).coerceIn(0.05f, 0.9f)
+                val y = ((device.position.y + 1) * 0.12f).coerceIn(0.05f, 0.9f)
+                DeviceNode(
+                    device = device,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .offset(
+                            x = (x * 100).dp,
+                            y = (y * 100).dp
+                        )
+                        .clickable { onDeviceClick(device.id) }
+                )
             }
         }
     }
