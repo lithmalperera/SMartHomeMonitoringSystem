@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,8 @@ import androidx.compose.material.icons.filled.Architecture
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +36,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.smarthome.monitor.core.util.DeviceStatus
 import com.smarthome.monitor.core.util.status
 import com.smarthome.monitor.data.model.Device
+import com.smarthome.monitor.data.model.Floor
 import com.smarthome.monitor.ui.components.BottomNavBar
 import com.smarthome.monitor.ui.components.BottomNavItem
 import com.smarthome.monitor.ui.components.DeviceIcon
@@ -58,7 +65,8 @@ import coil.compose.AsyncImage
 fun FloorScreen(
     floorId: String,
     onDeviceClick: (String) -> Unit,
-    onAddDevice: () -> Unit,
+    onAddDevice: (String) -> Unit,
+    onSelectFloor: (String) -> Unit,
     onHomeClick: () -> Unit,
     onAlertsClick: () -> Unit,
     onUsageClick: () -> Unit,
@@ -72,14 +80,16 @@ fun FloorScreen(
         topBar = {
             FloorTopBar(
                 floorName = uiState.floorName,
+                floors = uiState.floors,
+                currentFloorId = floorId,
                 alertBadge = uiState.alertsCount > 0,
-                onFloorSelectorClick = onHomeClick,
+                onSelectFloor = onSelectFloor,
                 onNotificationsClick = onAlertsClick
             )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onAddDevice,
+                onClick = { onAddDevice(floorId) },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(16.dp)
@@ -108,6 +118,8 @@ fun FloorScreen(
             else -> FloorCanvas(
                 imageUrl = uiState.imageUrl,
                 devices = uiState.devices,
+                gridColumns = uiState.gridColumns,
+                gridRows = uiState.gridRows,
                 onDeviceClick = onDeviceClick,
                 modifier = Modifier
                     .fillMaxSize()
@@ -120,10 +132,14 @@ fun FloorScreen(
 @Composable
 private fun FloorTopBar(
     floorName: String,
+    floors: List<Floor>,
+    currentFloorId: String,
     alertBadge: Boolean,
-    onFloorSelectorClick: () -> Unit,
+    onSelectFloor: (String) -> Unit,
     onNotificationsClick: () -> Unit
 ) {
+    var menuOpen by remember { mutableStateOf(false) }
+
     Surface(
         color = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp
@@ -135,27 +151,54 @@ private fun FloorTopBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Surface(
-                onClick = onFloorSelectorClick,
-                shape = RoundedCornerShape(percent = 50),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+            Box {
+                Surface(
+                    onClick = { menuOpen = true },
+                    shape = RoundedCornerShape(percent = 50),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh
                 ) {
-                    Text(
-                        text = floorName,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Switch floor",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(18.dp)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = floorName,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Switch floor",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+                DropdownMenu(
+                    expanded = menuOpen,
+                    onDismissRequest = { menuOpen = false }
+                ) {
+                    floors.forEach { floor ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = floor.name,
+                                    fontWeight = if (floor.id == currentFloorId) FontWeight.Bold else FontWeight.Normal
+                                )
+                            },
+                            onClick = {
+                                menuOpen = false
+                                if (floor.id != currentFloorId) onSelectFloor(floor.id)
+                            }
+                        )
+                    }
+                    if (floors.isEmpty()) {
+                        DropdownMenuItem(
+                            text = { Text("No floors yet") },
+                            onClick = { menuOpen = false }
+                        )
+                    }
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -196,6 +239,8 @@ private fun FloorTopBar(
 private fun FloorCanvas(
     imageUrl: String?,
     devices: List<Device>,
+    gridColumns: Int,
+    gridRows: Int,
     onDeviceClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -267,22 +312,21 @@ private fun FloorCanvas(
         )
 
         // 3. Devices (TOP LAYER)
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp)
         ) {
+            val cellW = maxWidth / gridColumns.coerceAtLeast(1)
+            val cellH = maxHeight / gridRows.coerceAtLeast(1)
             devices.forEach { device ->
-                // deterministic placement for demo
-                val x = ((device.position.x + 1) * 0.12f).coerceIn(0.05f, 0.9f)
-                val y = ((device.position.y + 1) * 0.12f).coerceIn(0.05f, 0.9f)
                 DeviceNode(
                     device = device,
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .offset(
-                            x = (x * 100).dp,
-                            y = (y * 100).dp
+                            x = (cellW * device.position.x).coerceAtLeast(0.dp),
+                            y = (cellH * device.position.y).coerceAtLeast(0.dp)
                         )
                         .clickable { onDeviceClick(device.id) }
                 )

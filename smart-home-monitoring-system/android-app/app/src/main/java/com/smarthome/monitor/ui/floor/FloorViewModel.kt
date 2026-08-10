@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.smarthome.monitor.data.model.Device
 import com.smarthome.monitor.data.model.DeviceType
+import com.smarthome.monitor.data.model.Floor
 import com.smarthome.monitor.data.model.GridPosition
 import com.smarthome.monitor.domain.repository.DeviceRepository
 import com.smarthome.monitor.domain.repository.FloorRepository
@@ -19,7 +20,10 @@ data class FloorUiState(
     val floorName: String = "",
     val imageUrl: String? = null,
     val devices: List<Device> = emptyList(),
-    val alertsCount: Int = 0
+    val alertsCount: Int = 0,
+    val floors: List<Floor> = emptyList(),
+    val gridColumns: Int = 4,
+    val gridRows: Int = 4
 )
 
 @HiltViewModel
@@ -47,7 +51,10 @@ class FloorViewModel @Inject constructor(
                         floorName = floor.name,
                         imageUrl = floor.imageUrl,
                         devices = floorDevices,
-                        alertsCount = floorDevices.count { it.state.error }
+                        alertsCount = floorDevices.count { it.state.error },
+                        floors = floors,
+                        gridColumns = floor.gridColumns,
+                        gridRows = floor.gridRows
                     )
                 } else {
                     val mockName = when (floorId) {
@@ -60,7 +67,8 @@ class FloorViewModel @Inject constructor(
                         isLoading = false,
                         floorName = mockName,
                         devices = emptyList(),
-                        alertsCount = 0
+                        alertsCount = 0,
+                        floors = floors
                     )
                 }
             }.collect { newState ->

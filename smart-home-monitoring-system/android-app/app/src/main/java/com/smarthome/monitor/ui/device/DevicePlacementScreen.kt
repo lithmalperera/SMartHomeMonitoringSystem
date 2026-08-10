@@ -35,6 +35,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +47,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.material3.Slider
 import com.smarthome.monitor.data.model.DeviceType
 import com.smarthome.monitor.ui.components.DeviceIcon
 import com.smarthome.monitor.ui.components.deviceStatusLabel
@@ -60,12 +63,17 @@ private val placementTypes = listOf(
 
 @Composable
 fun DevicePlacementScreen(
+    floorId: String,
     onClose: () -> Unit,
-    onSave: () -> Unit
+    onSave: () -> Unit,
+    viewModel: DevicePlacementViewModel = hiltViewModel()
 ) {
     var selectedType by remember { mutableStateOf(DeviceType.OUTLET) }
     var deviceName by remember { mutableStateOf("") }
     var selectedCell by remember { mutableIntStateOf(-1) }
+    var gangs by remember { mutableIntStateOf(2) }
+    var maxActiveMinutes by remember { mutableIntStateOf(15) }
+    val grid by viewModel.grid.collectAsState()
 
     Scaffold(
         topBar = {
@@ -107,7 +115,19 @@ fun DevicePlacementScreen(
         bottomBar = {
             Surface(color = MaterialTheme.colorScheme.surface, tonalElevation = 2.dp) {
                 Button(
-                    onClick = onSave,
+                    onClick = {
+                        if (selectedCell >= 0) {
+                            viewModel.saveDevice(
+                                name = deviceName.ifBlank { "New Device" },
+                                type = selectedType,
+                                cellIndex = selectedCell,
+                                maxActiveMinutes = maxActiveMinutes,
+                                gangs = gangs,
+                                onSuccess = onSave
+                            )
+                        }
+                    },
+                    enabled = selectedCell >= 0,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp),
@@ -173,6 +193,86 @@ fun DevicePlacementScreen(
                 )
             }
 
+            if (selectedType == DeviceType.SWITCH_PANEL) {
+                Column {
+                    Text(
+                        text = "NUMBER OF SWITCHES",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        listOf(2, 3, 5).forEach { count ->
+                            val isSelected = gangs == count
+                            Surface(
+                                onClick = { gangs = count },
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                                else MaterialTheme.colorScheme.surfaceContainerLowest,
+                                border = androidx.compose.foundation.BorderStroke(
+                                    width = 1.dp,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                                ),
+                                modifier = Modifier.width(84.dp)
+                            ) {
+                                Text(
+                                    text = "$count gangs",
+                                    fontSize = 12.sp,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                                    fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
+                                    modifier = Modifier.padding(vertical = 12.dp).fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (selectedType == DeviceType.IRON) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                    shape = RoundedCornerShape(12.dp),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outlineVariant
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Bottom
+                        ) {
+                            Text(
+                                text = "MAX ON DURATION",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "$maxActiveMinutes min",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Slider(
+                            value = maxActiveMinutes.toFloat(),
+                            onValueChange = { maxActiveMinutes = it.toInt() },
+                            valueRange = 5f..60f
+                        )
+                        Text(
+                            text = "Device auto-switches OFF after this duration (safety)",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
+                }
+            }
+
             Column {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -203,11 +303,11 @@ fun DevicePlacementScreen(
                         .padding(8.dp)
                 ) {
                     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                        val cols = 8
-                        val rows = 8
+                        val cols = grid.gridColumns.coerceAtLeast(1)
+                        val rows = grid.gridRows.coerceAtLeast(1)
                         val cellW = maxWidth / cols
                         val cellH = maxHeight / rows
-                        repeat(64) { index ->
+                        repeat(cols * rows) { index ->
                             val r = index / cols
                             val c = index % cols
                             val isSelected = index == selectedCell

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -18,23 +17,20 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EventRepeat
 import androidx.compose.material.icons.filled.Fullscreen
-import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -42,64 +38,43 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import com.smarthome.monitor.core.util.status
+import com.smarthome.monitor.data.model.Device
 import com.smarthome.monitor.data.model.DeviceType
-import com.smarthome.monitor.ui.components.DeviceIcon
 import com.smarthome.monitor.ui.components.EmptyState
 import com.smarthome.monitor.ui.components.LoadingBox
+import com.smarthome.monitor.ui.components.StatusBadge
+import kotlinx.coroutines.delay
 
 @Composable
 fun DeviceControlSheet(
     deviceId: String,
     onScheduleClick: () -> Unit,
     onDismiss: () -> Unit,
-    viewModel: DeviceControlViewModel = viewModel()
+    viewModel: DeviceControlViewModel = hiltViewModel()
 ) {
-    LaunchedEffect(deviceId) { viewModel.loadDevice(deviceId) }
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
-            Surface(color = MaterialTheme.colorScheme.surface) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(onClick = onDismiss) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        Text(
-                            text = "Device Control",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    IconButton(onClick = onScheduleClick) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-            }
+            DeviceControlTopBar(
+                onDismiss = onDismiss,
+                onDelete = { viewModel.deleteDevice(onDismiss) },
+                onScheduleClick = onScheduleClick
+            )
         }
     ) { padding ->
         when {
@@ -114,33 +89,29 @@ fun DeviceControlSheet(
                         .padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
+                    DeviceHeader(device = device)
                     when (device.type) {
-                        DeviceType.OUTLET, DeviceType.SWITCH_PANEL, DeviceType.LIGHT, DeviceType.LOCK ->
+                        DeviceType.OUTLET, DeviceType.LIGHT, DeviceType.LOCK, DeviceType.THERMOSTAT ->
                             OutletControlContent(
-                                deviceName = device.name,
-                                isOn = device.state.isOn,
+                                device = device,
                                 onToggle = { viewModel.togglePower() }
+                            )
+                        DeviceType.SWITCH_PANEL ->
+                            SwitchPanelControlContent(
+                                device = device,
+                                onToggleSwitch = { key -> viewModel.toggleSwitch(key) }
                             )
                         DeviceType.IRON ->
                             IronControlContent(
-                                deviceName = device.name,
-                                isOn = device.state.isOn,
-                                maxMinutes = device.config.maxActiveMinutes,
-                                autoOffSeconds = 1725,
+                                device = device,
                                 onToggle = { viewModel.togglePower() },
+                                onSaveLimit = { minutes -> viewModel.setMaxActiveMinutes(minutes) },
                                 onScheduleClick = onScheduleClick
                             )
                         DeviceType.CAMERA ->
                             CameraControlContent(
-                                deviceName = device.name,
-                                onRefresh = { viewModel.refreshSnapshot() },
-                                onFullscreen = { }
-                            )
-                        DeviceType.THERMOSTAT ->
-                            OutletControlContent(
-                                deviceName = device.name,
-                                isOn = device.state.isOn,
-                                onToggle = { viewModel.togglePower() }
+                                device = device,
+                                onRefresh = { viewModel.refreshSnapshot() }
                             )
                     }
                 }
@@ -150,7 +121,78 @@ fun DeviceControlSheet(
 }
 
 @Composable
-private fun OutletControlContent(deviceName: String, isOn: Boolean, onToggle: () -> Unit) {
+private fun DeviceControlTopBar(
+    onDismiss: () -> Unit,
+    onDelete: () -> Unit,
+    onScheduleClick: () -> Unit
+) {
+    Surface(color = MaterialTheme.colorScheme.surface) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Text(
+                    text = "Device Control",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onScheduleClick) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Schedule",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DeviceHeader(device: Device) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text(
+                text = device.name,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = device.room,
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        StatusBadge(status = device.status())
+    }
+}
+
+@Composable
+private fun OutletControlContent(device: Device, onToggle: () -> Unit) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLowest,
         shape = RoundedCornerShape(20.dp),
@@ -160,36 +202,6 @@ private fun OutletControlContent(deviceName: String, isOn: Boolean, onToggle: ()
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = deviceName,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "Last active: 2 mins ago",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    shape = RoundedCornerShape(percent = 50)
-                ) {
-                    Text(
-                        text = "ACTIVE",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                }
-            }
             Surface(
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
                 shape = RoundedCornerShape(16.dp),
@@ -204,7 +216,8 @@ private fun OutletControlContent(deviceName: String, isOn: Boolean, onToggle: ()
                         imageVector = Icons.Default.Power,
                         contentDescription = "Power",
                         modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = if (device.state.isOn) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.outlineVariant
                     )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -216,7 +229,7 @@ private fun OutletControlContent(deviceName: String, isOn: Boolean, onToggle: ()
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Switch(
-                            checked = isOn,
+                            checked = device.state.isOn,
                             onCheckedChange = { onToggle() }
                         )
                         Text(
@@ -229,7 +242,7 @@ private fun OutletControlContent(deviceName: String, isOn: Boolean, onToggle: ()
                 }
             }
             Text(
-                text = "Energy usage: 1.2 kWh total today",
+                text = "Wattage: ${device.config.wattage} W",
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -239,14 +252,94 @@ private fun OutletControlContent(deviceName: String, isOn: Boolean, onToggle: ()
 }
 
 @Composable
+private fun SwitchPanelControlContent(device: Device, onToggleSwitch: (String) -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Gang Switches",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                StatusBadge(status = device.status())
+            }
+            device.state.switches.toSortedMap().forEach { (key, on) ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Gang ${key.removePrefix("s")}",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = if (on) "ON" else "OFF",
+                            fontSize = 12.sp,
+                            color = if (on) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = on,
+                        onCheckedChange = { onToggleSwitch(key) }
+                    )
+                }
+            }
+            if (device.state.switches.isEmpty()) {
+                Text(
+                    text = "No switches configured",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun IronControlContent(
-    deviceName: String,
-    isOn: Boolean,
-    maxMinutes: Int,
-    autoOffSeconds: Int,
+    device: Device,
     onToggle: () -> Unit,
+    onSaveLimit: (Int) -> Unit,
     onScheduleClick: () -> Unit
 ) {
+    val isOn = device.state.isOn
+    val maxMinutes = device.config.maxActiveMinutes
+    var remainingSeconds by remember { mutableIntStateOf(0) }
+    var limitDraft by remember { mutableIntStateOf(maxMinutes) }
+
+    LaunchedEffect(isOn, device.state.lastOnAt, maxMinutes) {
+        limitDraft = maxMinutes
+        if (isOn && device.state.lastOnAt > 0) {
+            while (true) {
+                val elapsed = ((System.currentTimeMillis() - device.state.lastOnAt) / 1000L).toInt()
+                remainingSeconds = (maxMinutes * 60 - elapsed).coerceAtLeast(0)
+                if (remainingSeconds <= 0) break
+                delay(1000)
+            }
+        } else {
+            remainingSeconds = maxMinutes * 60
+        }
+    }
+
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLowest,
         shape = RoundedCornerShape(20.dp),
@@ -263,7 +356,7 @@ private fun IronControlContent(
             ) {
                 Column {
                     Text(
-                        text = deviceName,
+                        text = device.name,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -276,7 +369,7 @@ private fun IronControlContent(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "Heating up...",
+                            text = if (isOn) "Heating up..." else "Idle",
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.error
                         )
@@ -290,7 +383,7 @@ private fun IronControlContent(
             ) {
                 TimerCard(
                     label = "Auto-off in",
-                    value = formatSeconds(autoOffSeconds),
+                    value = formatSeconds(remainingSeconds),
                     modifier = Modifier.weight(1f)
                 )
                 TimerCard(
@@ -299,10 +392,47 @@ private fun IronControlContent(
                     modifier = Modifier.weight(1f)
                 )
             }
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Text(
+                        text = "Max ON Duration",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "$limitDraft min",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Slider(
+                    value = limitDraft.toFloat(),
+                    onValueChange = { limitDraft = it.toInt() },
+                    valueRange = 5f..60f,
+                    steps = 10
+                )
+            }
+            Button(
+                onClick = { onSaveLimit(limitDraft) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Save Safety Limit")
+            }
             Button(
                 onClick = onScheduleClick,
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
             ) {
                 Icon(Icons.Default.EventRepeat, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
@@ -346,11 +476,7 @@ private fun formatSeconds(totalSeconds: Int): String {
 }
 
 @Composable
-private fun CameraControlContent(
-    deviceName: String,
-    onRefresh: () -> Unit,
-    onFullscreen: () -> Unit
-) {
+private fun CameraControlContent(device: Device, onRefresh: () -> Unit) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLowest,
         shape = RoundedCornerShape(20.dp),
@@ -365,21 +491,31 @@ private fun CameraControlContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = deviceName,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Column {
+                    Text(
+                        text = device.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = device.room,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
                             .size(8.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.error)
+                            .background(
+                                if (device.state.online) MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.outlineVariant
+                            )
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "LIVE",
+                        text = if (device.state.online) "LIVE" else "OFFLINE",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -392,76 +528,37 @@ private fun CameraControlContent(
                     .fillMaxWidth()
                     .aspectRatio(16f / 9f)
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Default.Fullscreen,
-                        contentDescription = "Camera",
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.surfaceVariant
+                if (!device.state.snapshotUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = device.state.snapshotUrl,
+                        contentDescription = "Camera snapshot",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
                     )
-                    Row(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        IconButton(
-                            onClick = { },
-                            modifier = Modifier
-                                .size(36.dp)
-                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.3f), CircleShape)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ZoomIn,
-                                contentDescription = "Zoom",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        IconButton(
-                            onClick = onFullscreen,
-                            modifier = Modifier
-                                .size(36.dp)
-                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.3f), CircleShape)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Fullscreen,
-                                contentDescription = "Fullscreen",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
+                } else {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.Fullscreen,
+                            contentDescription = "No snapshot",
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.surfaceVariant
+                        )
                     }
                 }
             }
-            Row(
+            Text(
+                text = "Stream: ${device.state.streamUrl.ifBlank { "No stream configured" }}",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Button(
+                onClick = onRefresh,
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Button(
-                    onClick = onRefresh,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                ) {
-                    Icon(Icons.Default.Refresh, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Refresh Snapshot")
-                }
-                IconButton(
-                    onClick = { },
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(12.dp))
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Mic,
-                        contentDescription = "Mic",
-                        tint = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                }
+                Icon(Icons.Default.Refresh, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Refresh Snapshot")
             }
         }
     }

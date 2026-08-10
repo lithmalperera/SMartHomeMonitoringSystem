@@ -16,7 +16,7 @@ data class Device(
 data class GridPosition(val x: Int = 0, val y: Int = 0)
 
 data class DeviceState(
-    val isOn: Boolean = false,
+    var isOn: Boolean = false,
     val switches: Map<String, Boolean> = emptyMap(),
     val online: Boolean = true,
     val error: Boolean = false,
