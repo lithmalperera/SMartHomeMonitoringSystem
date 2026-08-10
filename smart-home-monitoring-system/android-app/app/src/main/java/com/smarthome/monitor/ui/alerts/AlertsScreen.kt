@@ -48,7 +48,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.smarthome.monitor.core.util.DateUtils
+import com.smarthome.monitor.data.model.Alert
+import com.smarthome.monitor.data.model.AlertSeverity
 import com.smarthome.monitor.ui.components.BottomNavBar
 import com.smarthome.monitor.ui.components.BottomNavItem
 import com.smarthome.monitor.ui.components.LoadingBox
@@ -62,7 +65,7 @@ fun AlertsScreen(
     onFloorClick: () -> Unit,
     onUsageClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    viewModel: AlertsViewModel = viewModel()
+    viewModel: AlertsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var selectedFilter by remember { mutableStateOf("All") }
@@ -93,6 +96,7 @@ fun AlertsScreen(
                 uiState = uiState,
                 selectedFilter = selectedFilter,
                 onFilterSelected = { selectedFilter = it },
+                onMarkRead = { viewModel.markRead(it) },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
@@ -159,8 +163,15 @@ private fun AlertsContent(
     uiState: AlertsUiState,
     selectedFilter: String,
     onFilterSelected: (String) -> Unit,
+    onMarkRead: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val filteredAlerts = when (selectedFilter) {
+        "Unread" -> uiState.alerts.filter { !it.isRead }
+        "Critical" -> uiState.alerts.filter { it.severity == AlertSeverity.CRITICAL }
+        else -> uiState.alerts
+    }
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(vertical = 16.dp),
@@ -242,14 +253,34 @@ private fun AlertsContent(
             }
         }
 
-        items(uiState.alerts) { alert ->
-            AlertCard(alert = alert)
+        items(filteredAlerts) { alert ->
+            AlertCard(alert = alert, onMarkRead = onMarkRead)
+        }
+
+        if (filteredAlerts.isEmpty()) {
+            item {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "No alerts — all clear.",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp)
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun AlertCard(alert: AlertItem) {
+private fun AlertCard(alert: Alert, onMarkRead: (String) -> Unit) {
     val (borderColor, iconBg, iconTint) = when (alert.severity) {
         AlertSeverity.CRITICAL ->
             Triple(MaterialTheme.colorScheme.error, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.onErrorContainer)
@@ -306,7 +337,7 @@ private fun AlertCard(alert: AlertItem) {
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = alert.time,
+                        text = DateUtils.timeAgo(alert.timestamp),
                         fontSize = 11.sp,
                         color = MaterialTheme.colorScheme.secondary
                     )
@@ -322,7 +353,7 @@ private fun AlertCard(alert: AlertItem) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Surface(
-                            onClick = { },
+                            onClick = { onMarkRead(alert.id) },
                             color = MaterialTheme.colorScheme.primaryContainer,
                             shape = RoundedCornerShape(8.dp)
                         ) {
@@ -335,7 +366,7 @@ private fun AlertCard(alert: AlertItem) {
                             )
                         }
                         Surface(
-                            onClick = { },
+                            onClick = { onMarkRead(alert.id) },
                             color = MaterialTheme.colorScheme.surfaceContainerHigh,
                             shape = RoundedCornerShape(8.dp)
                         ) {

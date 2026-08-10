@@ -23,4 +23,8 @@ class AuthRepositoryImpl @Inject constructor(
         val user = result.user ?: throw IllegalStateException("Firebase Auth failed to return a user")
         return User(uid = user.uid, homeId = "home_001")
     }
+
+    override suspend fun signOut() {
+        auth.signOut()
+    }
 }

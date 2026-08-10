@@ -14,6 +14,7 @@ import com.smarthome.monitor.ui.floor.FloorSetupScreen
 import com.smarthome.monitor.ui.home.HomeScreen
 import com.smarthome.monitor.ui.reports.ReportsScreen
 import com.smarthome.monitor.ui.schedule.ScheduleScreen
+import com.smarthome.monitor.ui.settings.AccountSettingsScreen
 import com.smarthome.monitor.ui.settings.SettingsScreen
 import com.smarthome.monitor.ui.splash.SplashScreen
 
@@ -111,7 +112,20 @@ fun NavGraph(navController: NavHostController) {
                 onHomeClick = { navController.navigate(Routes.HOME) { popUpTo(Routes.HOME) { inclusive = true } } },
                 onFloorClick = { navController.navigate(Routes.floor("floor_ground")) { popUpTo(Routes.HOME) } },
                 onAlertsClick = { navController.navigate(Routes.ALERTS) },
-                onUsageClick = { navController.navigate(Routes.USAGE) }
+                onUsageClick = { navController.navigate(Routes.USAGE) },
+                onAccountSettings = { navController.navigate(Routes.ACCOUNT_SETTINGS) },
+                onManageFloors = { navController.navigate(Routes.FLOOR_SETUP) },
+                onManageDevices = { navController.navigate(Routes.DEVICE_PLACEMENT) },
+                onLogout = {
+                    navController.navigate(Routes.SPLASH) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable(Routes.ACCOUNT_SETTINGS) {
+            AccountSettingsScreen(
+                onBack = { navController.popBackStack() }
             )
         }
     }

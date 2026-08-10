@@ -27,17 +27,23 @@ import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,7 +54,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.smarthome.monitor.ui.components.BottomNavBar
 import com.smarthome.monitor.ui.components.BottomNavItem
 import com.smarthome.monitor.ui.components.LoadingBox
@@ -60,11 +66,14 @@ fun SettingsScreen(
     onFloorClick: () -> Unit,
     onAlertsClick: () -> Unit,
     onUsageClick: () -> Unit,
+    onAccountSettings: () -> Unit = {},
+    onManageFloors: () -> Unit = {},
+    onManageDevices: () -> Unit = {},
     onLogout: () -> Unit = {},
-    viewModel: SettingsViewModel = viewModel()
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var isLoggingOut by remember { mutableStateOf(false) }
+    var showIronLimitDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -95,28 +104,46 @@ fun SettingsScreen(
                     .padding(horizontal = 20.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                ProfileCard()
+                ProfileCard(name = uiState.userName)
                 SyncCard()
                 SettingsGroup(title = "Preferences") {
                     MenuItem(
                         icon = Icons.Default.Person,
                         label = "Account Settings",
-                        onClick = { }
+                        onClick = onAccountSettings
                     )
                     MenuItem(
                         icon = Icons.Default.NotificationsActive,
                         label = "Notification Preferences",
-                        onClick = { }
+                        onClick = { },
+                        trailing = {
+                            Switch(
+                                checked = uiState.notificationsEnabled,
+                                onCheckedChange = { viewModel.setNotificationsEnabled(it) }
+                            )
+                        }
+                    )
+                    MenuItem(
+                        icon = Icons.Default.Timer,
+                        label = "Iron Safety Limit (default)",
+                        onClick = { showIronLimitDialog = true },
+                        trailing = {
+                            Text(
+                                text = "${uiState.ironLimitMinutes} min",
+                                fontSize = 13.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     )
                     MenuItem(
                         icon = Icons.Default.Layers,
                         label = "Manage Floor Plans",
-                        onClick = { }
+                        onClick = onManageFloors
                     )
                     MenuItem(
                         icon = Icons.Default.DevicesOther,
                         label = "Manage Devices",
-                        onClick = { }
+                        onClick = onManageDevices
                     )
                 }
                 SettingsGroup(title = "System") {
@@ -125,10 +152,7 @@ fun SettingsScreen(
                     AboutRow(label = "Privacy Policy", value = "", showExternal = true)
                 }
                 Button(
-                    onClick = {
-                        isLoggingOut = true
-                        onLogout()
-                    },
+                    onClick = { viewModel.logout(onLogout) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -142,7 +166,21 @@ fun SettingsScreen(
                         contentDescription = "Logout"
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(if (isLoggingOut) "Logging out..." else "Logout", fontWeight = FontWeight.Medium)
+                    Text(
+                        text = if (uiState.isLoggingOut) "Logging out..." else "Logout",
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                if (showIronLimitDialog) {
+                    IronLimitDialog(
+                        currentMinutes = uiState.ironLimitMinutes,
+                        onDismiss = { showIronLimitDialog = false },
+                        onSave = { minutes ->
+                            viewModel.setIronLimitMinutes(minutes)
+                            showIronLimitDialog = false
+                        }
+                    )
                 }
             }
         }
@@ -181,7 +219,7 @@ private fun SettingsTopBar() {
 }
 
 @Composable
-private fun ProfileCard() {
+private fun ProfileCard(name: String) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLowest,
         shape = RoundedCornerShape(12.dp),
@@ -198,7 +236,7 @@ private fun ProfileCard() {
             ProfileAvatar(size = 56)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Alex Thompson",
+                    text = name,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -309,7 +347,12 @@ private fun SettingsGroup(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun MenuItem(icon: ImageVector, label: String, onClick: () -> Unit) {
+private fun MenuItem(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    trailing: (@Composable () -> Unit)? = null
+) {
     Surface(
         onClick = onClick,
         color = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -336,13 +379,66 @@ private fun MenuItem(icon: ImageVector, label: String, onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = "Open",
-                tint = MaterialTheme.colorScheme.outline
-            )
+            if (trailing != null) {
+                trailing()
+            } else {
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = "Open",
+                    tint = MaterialTheme.colorScheme.outline
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun IronLimitDialog(
+    currentMinutes: Int,
+    onDismiss: () -> Unit,
+    onSave: (Int) -> Unit
+) {
+    var value by remember { mutableIntStateOf(currentMinutes) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Default Iron Safety Limit") },
+        text = {
+            Column {
+                Text(
+                    text = "Used as the max on-duration for safety-critical devices when no specific value is set.",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "$value min",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Slider(
+                    value = value.toFloat(),
+                    onValueChange = { value = it.toInt() },
+                    valueRange = 5f..60f,
+                    steps = 10
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("5m", fontSize = 10.sp, color = MaterialTheme.colorScheme.outline)
+                    Text("60m", fontSize = 10.sp, color = MaterialTheme.colorScheme.outline)
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = { onSave(value) }) { Text("Save") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
 }
 
 @Composable

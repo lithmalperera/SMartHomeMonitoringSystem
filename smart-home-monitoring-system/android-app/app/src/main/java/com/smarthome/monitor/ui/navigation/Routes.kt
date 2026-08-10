@@ -11,6 +11,7 @@ object Routes {
     const val ALERTS = "alerts"
     const val USAGE = "usage"
     const val SETTINGS = "settings"
+    const val ACCOUNT_SETTINGS = "account_settings"
 
     fun floor(floorId: String) = "floor/$floorId"
     fun device(deviceId: String) = "device/$deviceId"

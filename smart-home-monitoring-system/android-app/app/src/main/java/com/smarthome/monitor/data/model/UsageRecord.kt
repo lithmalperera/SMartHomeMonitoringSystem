@@ -4,5 +4,6 @@ data class UsageRecord(
     val date: String = "",
     val activeMinutes: Long = 0,
     val sessions: Int = 0,
-    val energyWh: Double = 0.0
+    val energyWh: Double = 0.0,
+    val autoCutoffs: Int = 0
 )

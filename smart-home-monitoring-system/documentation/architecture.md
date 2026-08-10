@@ -443,7 +443,8 @@ homes/{homeId}/
 │   ├── state/       isOn, switches{}, online, error, streamUrl, snapshotUrl, lastOnAt, lastChangedBy
 │   └── config/      maxActiveMinutes, wattage
 ├── schedules/{scheduleId}   deviceId, onTime, offTime, enabled, lastRunKey
-└── usage/{deviceId}/{yyyy-MM-dd}   activeMinutes, sessions, energyWh
+├── usage/{deviceId}/{yyyy-MM-dd}   activeMinutes, sessions, energyWh, autoCutoffs
+└── alerts/{alertId}          title, message, severity, deviceId, timestamp, isRead
 users/{uid}/         homeId
 ```
 

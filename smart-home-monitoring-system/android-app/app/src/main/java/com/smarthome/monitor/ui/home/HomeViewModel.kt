@@ -15,6 +15,7 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 import com.smarthome.monitor.data.model.ActivityType as ModelActivityType
+import com.smarthome.monitor.domain.repository.AlertRepository
 import com.smarthome.monitor.domain.repository.DeviceRepository
 import kotlinx.coroutines.launch
 
@@ -57,7 +58,8 @@ data class HomeUiState(
 class HomeViewModel @Inject constructor(
     private val floorRepository: FloorRepository,
     private val activityRepository: ActivityRepository,
-    private val deviceRepository: DeviceRepository
+    private val deviceRepository: DeviceRepository,
+    private val alertRepository: AlertRepository
 ) : ViewModel() {
 
     fun turnAllLights(on: Boolean) {
@@ -112,8 +114,9 @@ class HomeViewModel @Inject constructor(
 
     val uiState: StateFlow<HomeUiState> = combine(
         floorRepository.observeFloors(),
-        activityRepository.observeActivities()
-    ) { floorsList, activitiesList ->
+        activityRepository.observeActivities(),
+        alertRepository.observeAlerts()
+    ) { floorsList, activitiesList, alerts ->
         val currentDate = SimpleDateFormat("EEEE, dd MMMM yyyy", Locale.getDefault()).format(Date())
         val currentTime = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date())
 
@@ -126,7 +129,7 @@ class HomeViewModel @Inject constructor(
             floorsCount = floorsList.size,
             totalDevices = floorsList.size * 4,
             onlineCount = floorsList.size * 3,
-            alertsCount = if (floorsList.isNotEmpty()) 1 else 0,
+            alertsCount = alerts.count { !it.isRead },
             properties = _properties,
             floors = floorsList,
             recentActivities = activitiesList.map { dbActivity ->

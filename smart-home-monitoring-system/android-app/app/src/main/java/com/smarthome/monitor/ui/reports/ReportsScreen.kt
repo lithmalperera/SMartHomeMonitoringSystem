@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -16,24 +15,17 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AcUnit
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.EvStation
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.InsertChart
-import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.TimerOff
 import androidx.compose.material.icons.filled.TouchApp
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -53,16 +45,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.smarthome.monitor.ui.components.BottomNavBar
 import com.smarthome.monitor.ui.components.BottomNavItem
+import com.smarthome.monitor.ui.components.DeviceIcon
 import com.smarthome.monitor.ui.components.LoadingBox
 import com.smarthome.monitor.ui.components.ProfileAvatar
 
-private val periods = listOf("Daily", "Weekly", "Monthly")
-private val devices = listOf("All Devices", "Living Room AC", "Smart Bulb - Kitchen", "EV Charger - Garage", "Security System")
+private const val ALL_DEVICES = "All Devices"
 
 @Composable
 fun ReportsScreen(
@@ -70,11 +64,9 @@ fun ReportsScreen(
     onFloorClick: () -> Unit,
     onAlertsClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    viewModel: ReportsViewModel = viewModel()
+    viewModel: ReportsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var selectedDevice by remember { mutableStateOf(devices.first()) }
-    var selectedPeriod by remember { mutableStateOf(periods.first()) }
     var deviceMenuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -111,69 +103,18 @@ fun ReportsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Surface(
-                        onClick = { deviceMenuExpanded = true },
-                        color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                        shape = RoundedCornerShape(12.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = selectedDevice,
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Icon(
-                                imageVector = Icons.Default.ExpandMore,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.outline
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = deviceMenuExpanded,
-                            onDismissRequest = { deviceMenuExpanded = false }
-                        ) {
-                            devices.forEach { device ->
-                                DropdownMenuItem(
-                                    text = { Text(device) },
-                                    onClick = {
-                                        selectedDevice = device
-                                        deviceMenuExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
+                    DeviceSelector(
+                        devices = uiState.devices,
+                        selectedDeviceId = uiState.selectedDeviceId,
+                        expanded = deviceMenuExpanded,
+                        onExpandedChange = { deviceMenuExpanded = it },
+                        onDeviceSelected = { viewModel.selectDevice(it) }
+                    )
 
-                    Surface(
-                        color = MaterialTheme.colorScheme.surfaceContainer,
-                        shape = RoundedCornerShape(percent = 50)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(4.dp),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            periods.forEach { period ->
-                                val isSelected = period == selectedPeriod
-                                Surface(
-                                    onClick = { selectedPeriod = period },
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainer,
-                                    shape = RoundedCornerShape(percent = 50)
-                                ) {
-                                    Text(
-                                        text = period,
-                                        fontSize = 12.sp,
-                                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    PeriodSelector(
+                        selected = uiState.selectedPeriod,
+                        onSelected = { viewModel.selectPeriod(it) }
+                    )
                 }
 
                 Row(
@@ -183,24 +124,24 @@ fun ReportsScreen(
                     SummaryCard(
                         icon = Icons.Default.Bolt,
                         label = "Total Usage",
-                        value = "142.5 kWh",
-                        change = "+12%",
+                        value = uiState.summary.totalKwh,
+                        change = uiState.selectedPeriod.label,
                         accentColor = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.weight(1f)
                     )
                     SummaryCard(
                         icon = Icons.Default.TouchApp,
                         label = "Activations",
-                        value = "56 Total",
-                        change = "Avg. 8/day",
+                        value = "${uiState.summary.totalSessions}",
+                        change = "Sessions",
                         accentColor = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.weight(1f)
                     )
                     SummaryCard(
                         icon = Icons.Default.TimerOff,
                         label = "Auto-cutoffs",
-                        value = "3 Times",
-                        change = "Safety Active",
+                        value = "${uiState.summary.totalCutoffs}",
+                        change = if (uiState.summary.totalCutoffs > 0) "Safety triggered" else "No cutoffs",
                         accentColor = MaterialTheme.colorScheme.error,
                         modifier = Modifier.weight(1f)
                     )
@@ -227,7 +168,7 @@ fun ReportsScreen(
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = "Operating hours per day (last 7 days)",
+                                    text = chartSubtitle(uiState.selectedPeriod),
                                     fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -237,7 +178,7 @@ fun ReportsScreen(
                                 LegendItem(color = MaterialTheme.colorScheme.surfaceContainerHighest, label = "Idle")
                             }
                         }
-                        UsageChart()
+                        UsageChart(chart = uiState.chart)
                     }
                 }
 
@@ -271,13 +212,149 @@ fun ReportsScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(12.dp))
-                    uiState.history.forEach { item ->
-                        HistoryCard(item = item)
-                        Spacer(modifier = Modifier.height(8.dp))
+                    if (uiState.history.isEmpty()) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "No usage data for this period yet.\nUsage starts recording when devices are switched on or off.",
+                                fontSize = 13.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                lineHeight = 18.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp)
+                            )
+                        }
+                    } else {
+                        uiState.history.forEach { item ->
+                            HistoryCard(item = item)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DeviceSelector(
+    devices: List<com.smarthome.monitor.data.model.Device>,
+    selectedDeviceId: String?,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onDeviceSelected: (String?) -> Unit
+) {
+    val selectedLabel = selectedDeviceId
+        ?.let { id -> devices.find { it.id == id }?.name }
+        ?: ALL_DEVICES
+
+    Surface(
+        onClick = { onExpandedChange(true) },
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        shape = RoundedCornerShape(12.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = selectedLabel,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.widthIn(max = 180.dp)
+            )
+            Icon(
+                imageVector = Icons.Default.ExpandMore,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) }
+        ) {
+            DropdownMenuItem(
+                text = { Text(ALL_DEVICES) },
+                onClick = {
+                    onDeviceSelected(null)
+                    onExpandedChange(false)
+                }
+            )
+            devices.forEach { device ->
+                DropdownMenuItem(
+                    text = { Text(device.name) },
+                    onClick = {
+                        onDeviceSelected(device.id)
+                        onExpandedChange(false)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PeriodSelector(
+    selected: ReportsPeriod,
+    onSelected: (ReportsPeriod) -> Unit
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        shape = RoundedCornerShape(percent = 50)
+    ) {
+        Row(
+            modifier = Modifier.padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            ReportsPeriod.entries.forEach { period ->
+                val isSelected = period == selected
+                Surface(
+                    onClick = { onSelected(period) },
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainer,
+                    shape = RoundedCornerShape(percent = 50)
+                ) {
+                    Text(
+                        text = period.label,
+                        fontSize = 12.sp,
+                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun chartSubtitle(period: ReportsPeriod): String = when (period) {
+    ReportsPeriod.DAILY -> "Today's energy use per device"
+    ReportsPeriod.WEEKLY -> "Energy use per day (last 7 days)"
+    ReportsPeriod.MONTHLY -> "Energy use per week (this month)"
+}
+
+@Composable
+private fun LegendItem(color: androidx.compose.ui.graphics.Color, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .clip(RoundedCornerShape(percent = 50))
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = label,
+            fontSize = 10.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -365,69 +442,60 @@ private fun SummaryCard(
 }
 
 @Composable
-private fun LegendItem(color: androidx.compose.ui.graphics.Color, label: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier = Modifier
-                .size(10.dp)
-                .clip(RoundedCornerShape(percent = 50))
-                .background(color)
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = label,
-            fontSize = 10.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-private fun UsageChart() {
-    val data = listOf(4.5f, 7.0f, 3.0f, 8.5f, 6.0f, 9.5f, 5.0f)
-    val labels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-    val max = data.maxOrNull() ?: 1f
+private fun UsageChart(chart: List<ChartBar>) {
+    val max = chart.maxOfOrNull { it.value } ?: 0f
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(220.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            data.forEachIndexed { index, value ->
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .background(
-                                MaterialTheme.colorScheme.surfaceContainerHighest,
-                                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
-                            ),
-                        contentAlignment = Alignment.BottomCenter
+        if (chart.isEmpty() || max <= 0f) {
+            Text(
+                text = "No usage data for this period",
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                chart.forEach { bar ->
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Box(
                             modifier = Modifier
+                                .weight(1f)
                                 .fillMaxWidth()
-                                .fillMaxHeight(value / max)
                                 .background(
-                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.surfaceContainerHighest,
                                     RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
-                                )
+                                ),
+                            contentAlignment = Alignment.BottomCenter
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight((bar.value / max).coerceIn(0.02f, 1f))
+                                    .background(
+                                        MaterialTheme.colorScheme.primary,
+                                        RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
+                                    )
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = bar.label,
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = labels[index],
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
             }
         }
@@ -453,9 +521,8 @@ private fun HistoryCard(item: UsageHistoryItem) {
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.size(48.dp)
             ) {
-                Icon(
-                    imageVector = item.icon,
-                    contentDescription = null,
+                DeviceIcon(
+                    type = item.type,
                     modifier = Modifier.padding(12.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -478,7 +545,7 @@ private fun HistoryCard(item: UsageHistoryItem) {
                     )
                 }
                 Text(
-                    text = item.period,
+                    text = "${item.periodLabel} · ${item.sessions} sessions",
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.outline
                 )
@@ -491,14 +558,14 @@ private fun HistoryCard(item: UsageHistoryItem) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Surface(
-                    color = if (item.tag == "Peak Hours") MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f)
+                    color = if (item.autoCutoffs > 0) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f)
                     else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
                     shape = RoundedCornerShape(6.dp)
                 ) {
                     Text(
-                        text = item.tag,
+                        text = if (item.autoCutoffs > 0) "Safety Active" else "Standard",
                         fontSize = 10.sp,
-                        color = if (item.tag == "Peak Hours") MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                        color = if (item.autoCutoffs > 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                     )
@@ -507,4 +574,3 @@ private fun HistoryCard(item: UsageHistoryItem) {
         }
     }
 }
-

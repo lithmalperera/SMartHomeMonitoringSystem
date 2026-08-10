@@ -18,6 +18,15 @@ import javax.inject.Singleton
 import com.smarthome.monitor.data.repository.DeviceRepositoryImpl
 import com.smarthome.monitor.domain.repository.DeviceRepository
 
+import com.smarthome.monitor.data.repository.UsageRepositoryImpl
+import com.smarthome.monitor.domain.repository.UsageRepository
+
+import com.smarthome.monitor.data.repository.SettingsRepositoryImpl
+import com.smarthome.monitor.domain.repository.SettingsRepository
+
+import com.smarthome.monitor.data.repository.AlertRepositoryImpl
+import com.smarthome.monitor.domain.repository.AlertRepository
+
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class AppModule {
@@ -45,6 +54,24 @@ abstract class AppModule {
     abstract fun bindDeviceRepository(
         impl: DeviceRepositoryImpl
     ): DeviceRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUsageRepository(
+        impl: UsageRepositoryImpl
+    ): UsageRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(
+        impl: SettingsRepositoryImpl
+    ): SettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAlertRepository(
+        impl: AlertRepositoryImpl
+    ): AlertRepository
 
     companion object {
         @Provides

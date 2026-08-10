@@ -14,6 +14,7 @@ object Constants {
         const val USAGE = "usage"
         const val USERS = "users"
         const val ACTIVITIES = "activities"
+        const val ALERTS = "alerts"
 
         fun homeRoot() = "$HOMES/$HOME_ID"
         fun floors() = "${homeRoot()}/$FLOORS"
@@ -24,11 +25,14 @@ object Constants {
         fun deviceConfig(deviceId: String) = "${device(deviceId)}/$CONFIG"
         fun schedules() = "${homeRoot()}/$SCHEDULES"
         fun schedule(scheduleId: String) = "${homeRoot()}/$SCHEDULES/$scheduleId"
-        fun usage(deviceId: String) = "${homeRoot()}/$USAGE/$deviceId"
+        fun usageRoot() = "${homeRoot()}/$USAGE"
+        fun usage(deviceId: String) = "${usageRoot()}/$deviceId"
         fun usageDate(deviceId: String, date: String) = "${homeRoot()}/$USAGE/$deviceId/$date"
         fun users() = "$USERS"
         fun user(uid: String) = "$USERS/$uid"
         fun activities() = "${homeRoot()}/$ACTIVITIES"
         fun activity(activityId: String) = "${activities()}/$activityId"
+        fun alerts() = "${homeRoot()}/$ALERTS"
+        fun alert(alertId: String) = "${alerts()}/$alertId"
     }
 }

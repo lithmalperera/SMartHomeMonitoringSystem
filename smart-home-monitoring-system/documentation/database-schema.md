@@ -134,10 +134,45 @@ Realtime Database console → ⋮ → *Import JSON* to bootstrap the project.
 
       "usage": {
         "dev_iron_kitchen": {
-          "2026-07-20": { "activeMinutes": 25, "sessions": 2, "energyWh": 416.7 }
+          "2026-07-20": { "activeMinutes": 25, "sessions": 2, "energyWh": 416.7, "autoCutoffs": 2 }
         },
         "dev_light_living": {
-          "2026-07-20": { "activeMinutes": 180, "sessions": 3, "energyWh": 36.0 }
+          "2026-07-20": { "activeMinutes": 180, "sessions": 3, "energyWh": 36.0, "autoCutoffs": 0 }
+        }
+      },
+
+      "alerts": {
+        "alert_iron_cutoff": {
+          "deviceId": "dev_iron_kitchen",
+          "title": "Safety cutoff",
+          "message": "Iron was automatically turned OFF after exceeding the 15 min safety limit.",
+          "timestamp": 1786276800000,
+          "severity": "CRITICAL",
+          "isRead": false
+        },
+        "alert_camera_motion": {
+          "deviceId": "dev_cam_porch",
+          "title": "Motion detected",
+          "message": "Motion detected at the porch camera.",
+          "timestamp": 1786273200000,
+          "severity": "SECURITY",
+          "isRead": false
+        },
+        "alert_garden_light": {
+          "deviceId": "dev_light_garden",
+          "title": "Scheduled ON",
+          "message": "Garden light turned ON automatically by schedule.",
+          "timestamp": 1786266000000,
+          "severity": "INFO",
+          "isRead": false
+        },
+        "alert_panel_hall": {
+          "deviceId": "dev_panel_hall",
+          "title": "Switch panel updated",
+          "message": "Hall switch panel gang 2 was toggled.",
+          "timestamp": 1786176000000,
+          "severity": "ROUTINE",
+          "isRead": true
         }
       }
     }
@@ -174,7 +209,8 @@ functions (defined in `core/util/Constants.kt` and `js/config/firebase-config.js
 | `.../config/maxActiveMinutes` | App (Device Control sheet) | `safetyMonitor`, both UIs | The spec's `max_on_duration` |
 | `.../config/wattage` | App / seed data | `usageLogger` | For the energy estimate |
 | `homes/{id}/schedules/{scheduleId}` | App (Schedule screen) | `scheduleRunner`, App | One schedule per device is enough |
-| `homes/{id}/usage/{deviceId}/{yyyy-MM-dd}` | **`usageLogger` only** | App (Reports) | Pre-aggregated daily totals |
+| `homes/{id}/usage/{deviceId}/{yyyy-MM-dd}` | **`usageLogger` / `safetyMonitor`** | App (Reports) | Pre-aggregated daily totals: `activeMinutes`, `sessions`, `energyWh`, `autoCutoffs` |
+| `homes/{id}/alerts/{alertId}` | `safetyMonitor` (cutoffs), App (user events) | App (Alerts) | Notification log: `title`, `message`, `severity` (CRITICAL/SECURITY/INFO/ROUTINE), `deviceId`, `timestamp`, `isRead` |
 | `users/{uid}` | App on first sign-in | App | Maps anonymous uid → homeId |
 
 **Rule of thumb:** the app owns *structure* (floors, devices, schedules, config), the
@@ -211,8 +247,11 @@ Identical logic in Android (`core/util`) and simulator (`base-device.js`).
    screen reads one small node per device per day. No raw event log is ever stored.
 5. **`energyWh` computed server-side** in `usageLogger` (`minutes/60 × wattage`) so every
    client displays the same number with zero duplicated math.
-6. **FCM via topic** `home_{homeId}` — no FCM token storage in the DB at all.
-7. **Unused fields per type stay at defaults** (e.g. `switches` empty for an outlet) —
+6. **`autoCutoffs` counted server-side** — `safetyMonitor` increments the daily counter
+   (`ServerValue.increment(1)`) whenever it force-OFFs a device, so the Reports screen can
+   show cutoff counts without scanning an event log.
+7. **FCM via topic** `home_{homeId}` — no FCM token storage in the DB at all.
+8. **Unused fields per type stay at defaults** (e.g. `switches` empty for an outlet) —
    the flat model keeps Firebase (de)serialization trivial; see `architecture.md` §8.1.
 
 ---
