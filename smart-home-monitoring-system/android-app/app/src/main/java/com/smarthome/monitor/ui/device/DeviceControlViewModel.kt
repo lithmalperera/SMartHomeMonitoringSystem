@@ -1,64 +1,79 @@
 package com.smarthome.monitor.ui.device
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import androidx.lifecycle.viewModelScope
 import com.smarthome.monitor.data.model.Device
 import com.smarthome.monitor.data.model.DeviceConfig
-import com.smarthome.monitor.data.model.DeviceState
-import com.smarthome.monitor.data.model.DeviceType
+import com.smarthome.monitor.domain.repository.DeviceRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class DeviceControlUiState(
     val isLoading: Boolean = true,
     val device: Device? = null
 )
 
-class DeviceControlViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(DeviceControlUiState())
-    val uiState: StateFlow<DeviceControlUiState> = _uiState
+@HiltViewModel
+class DeviceControlViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+    private val deviceRepository: DeviceRepository
+) : ViewModel() {
 
-    fun loadDevice(deviceId: String) {
-        val device = when (deviceId) {
-            "dev_iron_master" -> Device(
-                id = deviceId,
-                name = "Smart Steam Iron",
-                type = DeviceType.IRON,
-                room = "Master Bedroom",
-                state = DeviceState(isOn = true, error = true),
-                config = DeviceConfig(maxActiveMinutes = 30)
-            )
-            "dev_cam_entry" -> Device(
-                id = deviceId,
-                name = "Front Door Cam",
-                type = DeviceType.CAMERA,
-                room = "Entry",
-                state = DeviceState(isOn = true)
-            )
-            "dev_outlet_coffee" -> Device(
-                id = deviceId,
-                name = "Living Room Outlet",
-                type = DeviceType.OUTLET,
-                room = "Kitchen",
-                state = DeviceState(isOn = true)
-            )
-            else -> Device(
-                id = deviceId,
-                name = "Device",
-                type = DeviceType.LIGHT,
-                state = DeviceState(isOn = false)
+    private val deviceId: String = savedStateHandle.get<String>("deviceId") ?: ""
+
+    val uiState: StateFlow<DeviceControlUiState> = deviceRepository.observeDevice(deviceId)
+        .map { device ->
+            DeviceControlUiState(
+                isLoading = false,
+                device = device
             )
         }
-        _uiState.value = DeviceControlUiState(isLoading = false, device = device)
-    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = DeviceControlUiState()
+        )
 
     fun togglePower() {
-        val current = _uiState.value.device ?: return
-        _uiState.value = _uiState.value.copy(
-            device = current.copy(state = current.state.copy(isOn = !current.state.isOn))
-        )
+        val device = uiState.value.device ?: return
+        viewModelScope.launch {
+            deviceRepository.setPower(deviceId, !device.state.isOn)
+        }
+    }
+
+    fun toggleSwitch(key: String) {
+        val device = uiState.value.device ?: return
+        val current = device.state.switches[key] ?: false
+        viewModelScope.launch {
+            deviceRepository.setPanelSwitch(deviceId, key, !current)
+        }
+    }
+
+    fun setMaxActiveMinutes(minutes: Int) {
+        val config = uiState.value.device?.config?.copy(maxActiveMinutes = minutes)
+            ?: DeviceConfig(maxActiveMinutes = minutes)
+        viewModelScope.launch {
+            deviceRepository.updateConfig(deviceId, config)
+        }
     }
 
     fun refreshSnapshot() {
-        // no-op for UI demo
+        viewModelScope.launch {
+            deviceRepository.refreshSnapshot(deviceId)
+        }
+    }
+
+    fun deleteDevice(onDeleted: () -> Unit) {
+        viewModelScope.launch {
+            deviceRepository.deleteDevice(deviceId)
+            onDeleted()
+        }
     }
 }

@@ -32,7 +32,7 @@ fun NavGraph(navController: NavHostController) {
             HomeScreen(
                 onFloorSelected = { floorId -> navController.navigate(Routes.floor(floorId)) },
                 onAddFloor = { navController.navigate(Routes.FLOOR_SETUP) },
-                onAddDevice = { navController.navigate(Routes.DEVICE_PLACEMENT) },
+                onAddDevice = { navController.navigate(Routes.devicePlacement("floor_ground")) },
                 onAlertsClick = { navController.navigate(Routes.ALERTS) },
                 onUsageClick = { navController.navigate(Routes.USAGE) },
                 onSettingsClick = { navController.navigate(Routes.SETTINGS) }
@@ -46,7 +46,12 @@ fun NavGraph(navController: NavHostController) {
             FloorScreen(
                 floorId = floorId,
                 onDeviceClick = { deviceId -> navController.navigate(Routes.device(deviceId)) },
-                onAddDevice = { navController.navigate(Routes.DEVICE_PLACEMENT) },
+                onAddDevice = { id -> navController.navigate(Routes.devicePlacement(id)) },
+                onSelectFloor = { id ->
+                    navController.navigate(Routes.floor(id)) {
+                        popUpTo(Routes.HOME)
+                    }
+                },
                 onHomeClick = { navController.navigate(Routes.HOME) { popUpTo(Routes.HOME) { inclusive = true } } },
                 onAlertsClick = { navController.navigate(Routes.ALERTS) },
                 onUsageClick = { navController.navigate(Routes.USAGE) },
@@ -59,8 +64,13 @@ fun NavGraph(navController: NavHostController) {
                 onSave = { navController.popBackStack() }
             )
         }
-        composable(Routes.DEVICE_PLACEMENT) {
+        composable(
+            route = Routes.DEVICE_PLACEMENT,
+            arguments = listOf(navArgument("floorId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val floorId = backStackEntry.arguments?.getString("floorId") ?: return@composable
             DevicePlacementScreen(
+                floorId = floorId,
                 onClose = { navController.popBackStack() },
                 onSave = { navController.popBackStack() }
             )

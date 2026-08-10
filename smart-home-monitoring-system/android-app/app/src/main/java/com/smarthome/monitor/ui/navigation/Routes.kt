@@ -6,7 +6,7 @@ object Routes {
     const val FLOOR = "floor/{floorId}"
     const val FLOOR_SETUP = "floor_setup"
     const val DEVICE = "device/{deviceId}"
-    const val DEVICE_PLACEMENT = "device_placement"
+    const val DEVICE_PLACEMENT = "device_placement/{floorId}"
     const val SCHEDULE = "schedule/{deviceId}"
     const val ALERTS = "alerts"
     const val USAGE = "usage"
@@ -16,4 +16,5 @@ object Routes {
     fun floor(floorId: String) = "floor/$floorId"
     fun device(deviceId: String) = "device/$deviceId"
     fun schedule(deviceId: String) = "schedule/$deviceId"
+    fun devicePlacement(floorId: String) = "device_placement/$floorId"
 }
