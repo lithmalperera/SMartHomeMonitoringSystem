@@ -58,4 +58,8 @@ class DeviceRepositoryImpl @Inject constructor(
     override suspend fun refreshSnapshot(deviceId: String) {
         dataSource.refreshSnapshot(deviceId)
     }
+
+    override suspend fun applyIronLimitToAll(minutes: Int) {
+        dataSource.applyIronLimitToAll(minutes)
+    }
 }

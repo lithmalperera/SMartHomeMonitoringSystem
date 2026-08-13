@@ -105,7 +105,10 @@ fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 ProfileCard(name = uiState.userName)
-                SyncCard()
+                SyncCard(
+                    isOnline = uiState.isOnline,
+                    onSyncNow = { viewModel.syncNow() }
+                )
                 SettingsGroup(title = "Preferences") {
                     MenuItem(
                         icon = Icons.Default.Person,
@@ -125,7 +128,7 @@ fun SettingsScreen(
                     )
                     MenuItem(
                         icon = Icons.Default.Timer,
-                        label = "Iron Safety Limit (default)",
+                        label = "Iron Safety Limit",
                         onClick = { showIronLimitDialog = true },
                         trailing = {
                             Text(
@@ -258,9 +261,10 @@ private fun ProfileCard(name: String) {
 }
 
 @Composable
-private fun SyncCard() {
+private fun SyncCard(isOnline: Boolean, onSyncNow: () -> Unit) {
     Surface(
-        color = MaterialTheme.colorScheme.primaryContainer,
+        color = if (isOnline) MaterialTheme.colorScheme.primaryContainer
+        else MaterialTheme.colorScheme.errorContainer,
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -279,32 +283,37 @@ private fun SyncCard() {
                         Icon(
                             imageVector = Icons.Default.CloudDone,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            tint = if (isOnline) MaterialTheme.colorScheme.onPrimaryContainer
+                            else MaterialTheme.colorScheme.onErrorContainer,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Cloud Sync: Active",
+                            text = if (isOnline) "Cloud Sync: Active" else "Cloud Sync: Offline",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            color = if (isOnline) MaterialTheme.colorScheme.onPrimaryContainer
+                            else MaterialTheme.colorScheme.onErrorContainer
                         )
                     }
                     Text(
-                        text = "Last synced 1m ago",
+                        text = if (isOnline) "Realtime · connected" else "Tap to reconnect",
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                        color = if (isOnline) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                        else MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f),
                         modifier = Modifier.padding(start = 28.dp)
                     )
                 }
                 Surface(
-                    onClick = { },
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    onClick = onSyncNow,
+                    color = if (isOnline) MaterialTheme.colorScheme.onPrimaryContainer
+                    else MaterialTheme.colorScheme.onErrorContainer,
                     shape = RoundedCornerShape(percent = 50)
                 ) {
                     Text(
                         text = "Sync Now",
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                        color = if (isOnline) MaterialTheme.colorScheme.primaryContainer
+                        else MaterialTheme.colorScheme.errorContainer,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)

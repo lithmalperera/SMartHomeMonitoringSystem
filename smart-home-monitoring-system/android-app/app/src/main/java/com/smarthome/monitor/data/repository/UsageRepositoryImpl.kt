@@ -14,4 +14,12 @@ class UsageRepositoryImpl @Inject constructor(
 
     override fun observeUsage(): Flow<Map<String, Map<String, UsageRecord>>> =
         dataSource.observeUsage()
+
+    override suspend fun recordUsage(deviceId: String, activeMinutes: Long, energyWh: Double) {
+        dataSource.recordUsage(deviceId, activeMinutes, energyWh)
+    }
+
+    override suspend fun recordCutoff(deviceId: String) {
+        dataSource.recordCutoff(deviceId)
+    }
 }

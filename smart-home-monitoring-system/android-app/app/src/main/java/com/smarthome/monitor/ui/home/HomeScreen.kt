@@ -62,6 +62,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.smarthome.monitor.R
+import com.smarthome.monitor.core.util.DateUtils
+import com.smarthome.monitor.data.model.Alert
+import com.smarthome.monitor.data.model.AlertSeverity
 import com.smarthome.monitor.data.model.Floor
 import com.smarthome.monitor.ui.components.BottomNavBar
 import com.smarthome.monitor.ui.components.BottomNavItem
@@ -125,6 +128,7 @@ fun HomeScreen(
                 onAllLightsOff = { viewModel.turnAllLights(false) },
                 onAllElectricalOff = { viewModel.turnAllElectricalDevicesOff() },
                 onEmergencyOff = { viewModel.emergencyOff() },
+                onAlertsClick = onAlertsClick,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
@@ -194,6 +198,7 @@ private fun HomeContent(
     onAllLightsOff: () -> Unit,
     onAllElectricalOff: () -> Unit,
     onEmergencyOff: () -> Unit,
+    onAlertsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -207,6 +212,11 @@ private fun HomeContent(
         HomeStatusSection(uiState.lastSync)
         
         StatsSection(uiState)
+
+        AlertsSection(
+            alerts = uiState.unreadAlerts,
+            onAlertsClick = onAlertsClick
+        )
         
         FloorsSection(
             floors = uiState.floors,
@@ -360,6 +370,105 @@ private fun StatCard(modifier: Modifier, icon: ImageVector, count: String, label
             }
             Text(text = count, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1A1A1A))
             Text(text = label, fontSize = 12.sp, color = Color.Gray)
+        }
+    }
+}
+
+@Composable
+private fun AlertsSection(alerts: List<Alert>, onAlertsClick: () -> Unit) {
+    if (alerts.isEmpty()) return
+
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Active Alerts", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable { onAlertsClick() }
+            ) {
+                Text("View All", color = Color(0xFF0047AB), fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = Color(0xFF0047AB),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            alerts.forEach { alert ->
+                Surface(
+                    onClick = onAlertsClick,
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color.White,
+                    shadowElevation = 1.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        val (dotColor, badgeText, badgeBg) = when (alert.severity) {
+                            AlertSeverity.CRITICAL ->
+                                Triple(Color(0xFFF44336), "CRITICAL", Color(0xFFFFEBEE))
+                            AlertSeverity.SECURITY ->
+                                Triple(Color(0xFF9C27B0), "SECURITY", Color(0xFFF3E5F5))
+                            AlertSeverity.INFO ->
+                                Triple(Color(0xFF0047AB), "INFO", Color(0xFFE3F2FD))
+                            AlertSeverity.ROUTINE ->
+                                Triple(Color(0xFF607D8B), "ROUTINE", Color(0xFFECEFF1))
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(dotColor)
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = alert.title,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF1A1A1A)
+                            )
+                            Text(
+                                text = alert.message,
+                                fontSize = 12.sp,
+                                color = Color.Gray,
+                                maxLines = 2,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.End) {
+                            Surface(
+                                color = badgeBg,
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Text(
+                                    text = badgeText,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = dotColor
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = DateUtils.timeAgo(alert.timestamp),
+                                fontSize = 11.sp,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

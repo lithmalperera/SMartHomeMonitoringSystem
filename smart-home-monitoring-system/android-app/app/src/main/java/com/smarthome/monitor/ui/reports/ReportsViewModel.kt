@@ -9,11 +9,13 @@ import com.smarthome.monitor.data.model.UsageRecord
 import com.smarthome.monitor.domain.repository.DeviceRepository
 import com.smarthome.monitor.domain.repository.UsageRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 enum class ReportsPeriod(val label: String) {
@@ -30,7 +32,8 @@ data class UsageHistoryItem(
     val duration: String,
     val energy: String,
     val sessions: Int,
-    val autoCutoffs: Int
+    val autoCutoffs: Int,
+    val isActive: Boolean = false
 )
 
 data class ChartBar(val label: String, val value: Float, val display: String)
@@ -48,7 +51,8 @@ data class ReportsUiState(
     val selectedPeriod: ReportsPeriod = ReportsPeriod.DAILY,
     val history: List<UsageHistoryItem> = emptyList(),
     val summary: ReportsSummary = ReportsSummary("0 Wh", 0, 0),
-    val chart: List<ChartBar> = emptyList()
+    val chart: List<ChartBar> = emptyList(),
+    val activeCount: Int = 0
 )
 
 @HiltViewModel
@@ -59,46 +63,84 @@ class ReportsViewModel @Inject constructor(
 
     private val periodFlow = MutableStateFlow(ReportsPeriod.DAILY)
     private val deviceFilterFlow = MutableStateFlow<String?>(null)
+    private val ticker = MutableStateFlow(0L)
+
+    init {
+        viewModelScope.launch {
+            while (true) {
+                delay(1000)
+                ticker.value = System.currentTimeMillis()
+            }
+        }
+    }
 
     val uiState: StateFlow<ReportsUiState> = combine(
         usageRepository.observeUsage(),
         deviceRepository.observeDevices(),
         periodFlow,
-        deviceFilterFlow
-    ) { usageByDevice, devices, period, selectedDeviceId ->
+        deviceFilterFlow,
+        ticker
+    ) { usageByDevice, devices, period, selectedDeviceId, now ->
         val deviceById = devices.associateBy { it.id }
         val summed = summedUsage(usageByDevice, selectedDeviceId, periodDates(period))
             .sortedByDescending { it.second.energyWh }
+
+        val activeDevices = if (period == ReportsPeriod.DAILY) {
+            devices.filter { device ->
+                (selectedDeviceId == null || device.id == selectedDeviceId) &&
+                    device.state.isOn &&
+                    device.state.lastOnAt > 0
+            }
+        } else {
+            emptyList()
+        }
 
         ReportsUiState(
             isLoading = false,
             devices = devices,
             selectedDeviceId = selectedDeviceId,
             selectedPeriod = period,
-            history = summed.map { (deviceId, record) ->
-                UsageHistoryItem(
-                    deviceId = deviceId,
-                    name = deviceById[deviceId]?.name ?: deviceId,
-                    type = deviceById[deviceId]?.type ?: DeviceType.OUTLET,
-                    periodLabel = periodLabel(period),
-                    duration = DateUtils.formatDuration(record.activeMinutes),
-                    energy = DateUtils.formatEnergy(record.energyWh),
-                    sessions = record.sessions,
-                    autoCutoffs = record.autoCutoffs
-                )
-            },
+            history = activeDevices.map { toActiveItem(it, now) } +
+                summed.map { (deviceId, record) ->
+                    UsageHistoryItem(
+                        deviceId = deviceId,
+                        name = deviceById[deviceId]?.name ?: deviceId,
+                        type = deviceById[deviceId]?.type ?: DeviceType.OUTLET,
+                        periodLabel = periodLabel(period),
+                        duration = DateUtils.formatDuration(record.activeMinutes),
+                        energy = DateUtils.formatEnergy(record.energyWh),
+                        sessions = record.sessions,
+                        autoCutoffs = record.autoCutoffs
+                    )
+                },
             summary = ReportsSummary(
                 totalKwh = DateUtils.formatEnergy(summed.sumOf { it.second.energyWh }),
                 totalSessions = summed.sumOf { it.second.sessions },
                 totalCutoffs = summed.sumOf { it.second.autoCutoffs }
             ),
-            chart = buildChart(usageByDevice, deviceById, period, selectedDeviceId)
+            chart = buildChart(usageByDevice, deviceById, period, selectedDeviceId, activeDevices, now),
+            activeCount = activeDevices.size
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = ReportsUiState()
     )
+
+    private fun toActiveItem(device: Device, now: Long): UsageHistoryItem {
+        val elapsedMin = ((now - device.state.lastOnAt) / 60000).coerceAtLeast(0)
+        return UsageHistoryItem(
+            deviceId = device.id,
+            name = device.name,
+            type = device.type,
+            periodLabel = "In progress",
+            duration = DateUtils.formatDuration(elapsedMin),
+            energy = DateUtils.formatEnergy((elapsedMin / 60.0) * device.config.wattage),
+            sessions = 0,
+            autoCutoffs = 0,
+            isActive = true
+        )
+    }
 
     fun selectPeriod(period: ReportsPeriod) {
         periodFlow.value = period
@@ -142,11 +184,13 @@ class ReportsViewModel @Inject constructor(
         usageByDevice: Map<String, Map<String, UsageRecord>>,
         deviceById: Map<String, Device>,
         period: ReportsPeriod,
-        deviceFilter: String?
+        deviceFilter: String?,
+        activeDevices: List<Device>,
+        now: Long
     ): List<ChartBar> = when (period) {
         ReportsPeriod.DAILY -> {
             val today = DateUtils.todayKey()
-            usageByDevice
+            val recordBars = usageByDevice
                 .filterKeys { deviceFilter == null || it == deviceFilter }
                 .mapNotNull { (deviceId, byDate) ->
                     val record = byDate[today] ?: return@mapNotNull null
@@ -160,6 +204,15 @@ class ReportsViewModel @Inject constructor(
                         display = DateUtils.formatEnergy(record.energyWh)
                     )
                 }
+            val activeBars = activeDevices.map { device ->
+                val elapsedMin = ((now - device.state.lastOnAt) / 60000).coerceAtLeast(0)
+                ChartBar(
+                    label = device.name,
+                    value = ((elapsedMin / 60.0) * device.config.wattage).toFloat(),
+                    display = "In progress"
+                )
+            }
+            (recordBars + activeBars).sortedByDescending { it.value }
         }
 
         ReportsPeriod.WEEKLY -> DateUtils.lastNDays(7).map { dateKey ->

@@ -71,4 +71,9 @@ object DateUtils {
             else -> "${difference / 86400000}d ago"
         }
     }
+
+    fun fullTime(timestamp: Long): String {
+        val format = SimpleDateFormat("MMM dd, yyyy · hh:mm a", Locale.getDefault())
+        return format.format(Date(timestamp))
+    }
 }

@@ -2,9 +2,14 @@ package com.smarthome.monitor.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.smarthome.monitor.core.util.Constants
 import com.smarthome.monitor.domain.repository.AuthRepository
+import com.smarthome.monitor.domain.repository.DeviceRepository
 import com.smarthome.monitor.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,29 +25,45 @@ data class SettingsUiState(
     val userName: String = "Videesha",
     val notificationsEnabled: Boolean = true,
     val ironLimitMinutes: Int = 15,
-    val isLoggingOut: Boolean = false
+    val isLoggingOut: Boolean = false,
+    val isOnline: Boolean = true
 )
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val deviceRepository: DeviceRepository,
+    private val db: FirebaseDatabase
 ) : ViewModel() {
 
     private val loggingOutFlow = MutableStateFlow(false)
+    private val connectionFlow = MutableStateFlow(true)
+
+    init {
+        db.getReference(".info/connected").addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                connectionFlow.value = snapshot.getValue(Boolean::class.java) ?: false
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
 
     val uiState: StateFlow<SettingsUiState> = combine(
         settingsRepository.notificationsEnabled,
         settingsRepository.ironLimitMinutes,
         settingsRepository.userName,
-        loggingOutFlow
-    ) { notificationsEnabled, ironLimitMinutes, userName, isLoggingOut ->
+        loggingOutFlow,
+        connectionFlow
+    ) { notificationsEnabled, ironLimitMinutes, userName, isLoggingOut, isOnline ->
         SettingsUiState(
             isLoading = false,
             userName = userName,
             notificationsEnabled = notificationsEnabled,
             ironLimitMinutes = ironLimitMinutes,
-            isLoggingOut = isLoggingOut
+            isLoggingOut = isLoggingOut,
+            isOnline = isOnline
         )
     }.stateIn(
         scope = viewModelScope,
@@ -69,6 +90,7 @@ class SettingsViewModel @Inject constructor(
     fun setIronLimitMinutes(minutes: Int) {
         viewModelScope.launch {
             settingsRepository.setIronLimitMinutes(minutes)
+            runCatching { deviceRepository.applyIronLimitToAll(minutes) }
         }
     }
 
@@ -76,6 +98,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             settingsRepository.setUserName(name)
         }
+    }
+
+    fun syncNow() {
+        db.goOnline()
     }
 
     fun logout(onComplete: () -> Unit) {

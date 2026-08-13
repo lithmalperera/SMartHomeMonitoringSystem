@@ -6,6 +6,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.smarthome.monitor.core.util.Constants
 import com.smarthome.monitor.data.model.Alert
+import com.smarthome.monitor.data.model.AlertSeverity
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -45,7 +46,7 @@ class FirebaseAlertDataSource @Inject constructor(
 
     suspend fun markRead(alertId: String) {
         db.getReference(Constants.DbPaths.alert(alertId))
-            .child("isRead")
+            .child("read")
             .setValue(true)
             .await()
     }
@@ -55,10 +56,30 @@ class FirebaseAlertDataSource @Inject constructor(
         val snapshot = ref.get().await()
         val updates = mutableMapOf<String, Any?>()
         for (child in snapshot.children) {
-            updates["${child.key}/isRead"] = true
+            updates["${child.key}/read"] = true
         }
         if (updates.isNotEmpty()) {
             ref.updateChildren(updates).await()
         }
+    }
+
+    suspend fun addAlert(
+        deviceId: String,
+        title: String,
+        message: String,
+        severity: AlertSeverity
+    ) {
+        val ref = db.getReference(Constants.DbPaths.alerts()).push()
+        val alertId = ref.key ?: throw IllegalStateException("Could not generate alert ID")
+        val alert = Alert(
+            id = alertId,
+            deviceId = deviceId,
+            title = title,
+            message = message,
+            timestamp = System.currentTimeMillis(),
+            severity = severity,
+            read = false
+        )
+        ref.setValue(alert).await()
     }
 }

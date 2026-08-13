@@ -444,7 +444,7 @@ homes/{homeId}/
 │   └── config/      maxActiveMinutes, wattage
 ├── schedules/{scheduleId}   deviceId, onTime, offTime, enabled, lastRunKey
 ├── usage/{deviceId}/{yyyy-MM-dd}   activeMinutes, sessions, energyWh, autoCutoffs
-└── alerts/{alertId}          title, message, severity, deviceId, timestamp, isRead
+└── alerts/{alertId}          title, message, severity, deviceId, timestamp, read
 users/{uid}/         homeId
 ```
 

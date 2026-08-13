@@ -15,6 +15,7 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 import com.smarthome.monitor.data.model.ActivityType as ModelActivityType
+import com.smarthome.monitor.data.model.Alert
 import com.smarthome.monitor.domain.repository.AlertRepository
 import com.smarthome.monitor.domain.repository.DeviceRepository
 import kotlinx.coroutines.launch
@@ -51,6 +52,7 @@ data class HomeUiState(
     val selectedFloor: Floor? = null,
     val onCount: Int = 0,
     val errorCount: Int = 0,
+    val unreadAlerts: List<Alert> = emptyList(),
     val recentActivities: List<RecentActivity> = emptyList()
 )
 
@@ -129,7 +131,8 @@ class HomeViewModel @Inject constructor(
             floorsCount = floorsList.size,
             totalDevices = floorsList.size * 4,
             onlineCount = floorsList.size * 3,
-            alertsCount = alerts.count { !it.isRead },
+            alertsCount = alerts.count { !it.read },
+            unreadAlerts = alerts.filter { !it.read },
             properties = _properties,
             floors = floorsList,
             recentActivities = activitiesList.map { dbActivity ->

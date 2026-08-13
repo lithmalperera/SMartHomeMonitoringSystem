@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -69,6 +70,7 @@ fun AlertsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var selectedFilter by remember { mutableStateOf("All") }
+    var expandedAlertId by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -95,8 +97,10 @@ fun AlertsScreen(
             else -> AlertsContent(
                 uiState = uiState,
                 selectedFilter = selectedFilter,
+                expandedAlertId = expandedAlertId,
                 onFilterSelected = { selectedFilter = it },
                 onMarkRead = { viewModel.markRead(it) },
+                onToggleDetails = { id -> expandedAlertId = if (expandedAlertId == id) null else id },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
@@ -162,12 +166,14 @@ private fun AlertsTopBar(alertBadge: Boolean) {
 private fun AlertsContent(
     uiState: AlertsUiState,
     selectedFilter: String,
+    expandedAlertId: String?,
     onFilterSelected: (String) -> Unit,
     onMarkRead: (String) -> Unit,
+    onToggleDetails: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val filteredAlerts = when (selectedFilter) {
-        "Unread" -> uiState.alerts.filter { !it.isRead }
+        "Unread" -> uiState.alerts.filter { !it.read }
         "Critical" -> uiState.alerts.filter { it.severity == AlertSeverity.CRITICAL }
         else -> uiState.alerts
     }
@@ -178,34 +184,13 @@ private fun AlertsContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Quick Filters",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontWeight = FontWeight.Medium
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Tune,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "More",
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Quick Filters",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.secondary,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(end = 8.dp)
@@ -254,7 +239,13 @@ private fun AlertsContent(
         }
 
         items(filteredAlerts) { alert ->
-            AlertCard(alert = alert, onMarkRead = onMarkRead)
+            AlertCard(
+                alert = alert,
+                deviceName = uiState.deviceNames[alert.deviceId],
+                expanded = alert.id == expandedAlertId,
+                onMarkRead = onMarkRead,
+                onToggleDetails = onToggleDetails
+            )
         }
 
         if (filteredAlerts.isEmpty()) {
@@ -280,7 +271,13 @@ private fun AlertsContent(
 }
 
 @Composable
-private fun AlertCard(alert: Alert, onMarkRead: (String) -> Unit) {
+private fun AlertCard(
+    alert: Alert,
+    deviceName: String?,
+    expanded: Boolean,
+    onMarkRead: (String) -> Unit,
+    onToggleDetails: (String) -> Unit
+) {
     val (borderColor, iconBg, iconTint) = when (alert.severity) {
         AlertSeverity.CRITICAL ->
             Triple(MaterialTheme.colorScheme.error, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.onErrorContainer)
@@ -302,7 +299,8 @@ private fun AlertCard(alert: Alert, onMarkRead: (String) -> Unit) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
+                .alpha(if (alert.read) 0.45f else 1f),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Box(
@@ -352,21 +350,23 @@ private fun AlertCard(alert: Alert, onMarkRead: (String) -> Unit) {
                 if (alert.severity == AlertSeverity.CRITICAL) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Surface(
-                            onClick = { onMarkRead(alert.id) },
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(
-                                text = "Dismiss",
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                            )
+                        if (!alert.read) {
+                            Surface(
+                                onClick = { onMarkRead(alert.id) },
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(
+                                    text = "Dismiss",
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
                         }
                         Surface(
-                            onClick = { onMarkRead(alert.id) },
+                            onClick = { onToggleDetails(alert.id) },
                             color = MaterialTheme.colorScheme.surfaceContainerHigh,
                             shape = RoundedCornerShape(8.dp)
                         ) {
@@ -378,6 +378,23 @@ private fun AlertCard(alert: Alert, onMarkRead: (String) -> Unit) {
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                             )
                         }
+                    }
+                }
+
+                if (expanded) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f))
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        ExpandedDetailRow(label = "Device", value = deviceName ?: alert.deviceId)
+                        ExpandedDetailRow(label = "Severity", value = alert.severity.name)
+                        ExpandedDetailRow(label = "Time", value = DateUtils.fullTime(alert.timestamp))
+                        ExpandedDetailRow(label = "Status", value = if (alert.read) "Read" else "Unread")
                     }
                 }
                 if (alert.severity == AlertSeverity.SECURITY) {
@@ -408,4 +425,25 @@ private fun alertIcon(severity: AlertSeverity): ImageVector = when (severity) {
     AlertSeverity.SECURITY -> Icons.Default.VideoCameraFront
     AlertSeverity.INFO -> Icons.Default.Lightbulb
     AlertSeverity.ROUTINE -> Icons.Default.Schedule
+}
+
+@Composable
+private fun ExpandedDetailRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            fontSize = 11.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
 }

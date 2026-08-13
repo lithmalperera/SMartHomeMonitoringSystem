@@ -9,5 +9,5 @@ data class Alert(
     val message: String = "",
     val timestamp: Long = 0L,
     val severity: AlertSeverity = AlertSeverity.INFO,
-    val isRead: Boolean = false
+    val read: Boolean = false
 )

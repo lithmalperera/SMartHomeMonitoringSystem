@@ -133,7 +133,7 @@ fun ReportsScreen(
                         icon = Icons.Default.TouchApp,
                         label = "Activations",
                         value = "${uiState.summary.totalSessions}",
-                        change = "Sessions",
+                        change = if (uiState.activeCount > 0) "${uiState.activeCount} active now" else "Sessions",
                         accentColor = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.weight(1f)
                     )
@@ -545,9 +545,9 @@ private fun HistoryCard(item: UsageHistoryItem) {
                     )
                 }
                 Text(
-                    text = "${item.periodLabel} · ${item.sessions} sessions",
+                    text = if (item.isActive) "● Active now" else "${item.periodLabel} · ${item.sessions} sessions",
                     fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.outline
+                    color = if (item.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                 )
             }
             Column(horizontalAlignment = Alignment.End) {
@@ -558,14 +558,25 @@ private fun HistoryCard(item: UsageHistoryItem) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Surface(
-                    color = if (item.autoCutoffs > 0) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f)
-                    else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
+                    color = when {
+                        item.isActive -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f)
+                        item.autoCutoffs > 0 -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f)
+                        else -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                    },
                     shape = RoundedCornerShape(6.dp)
                 ) {
                     Text(
-                        text = if (item.autoCutoffs > 0) "Safety Active" else "Standard",
+                        text = when {
+                            item.isActive -> "Active Now"
+                            item.autoCutoffs > 0 -> "Safety Active"
+                            else -> "Standard"
+                        },
                         fontSize = 10.sp,
-                        color = if (item.autoCutoffs > 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                        color = when {
+                            item.isActive -> MaterialTheme.colorScheme.tertiary
+                            item.autoCutoffs > 0 -> MaterialTheme.colorScheme.tertiary
+                            else -> MaterialTheme.colorScheme.primary
+                        },
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                     )

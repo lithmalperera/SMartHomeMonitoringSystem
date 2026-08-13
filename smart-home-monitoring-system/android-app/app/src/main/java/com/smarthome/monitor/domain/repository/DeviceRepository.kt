@@ -25,4 +25,5 @@ interface DeviceRepository {
     suspend fun setPanelSwitch(deviceId: String, key: String, on: Boolean)
     suspend fun updateConfig(deviceId: String, config: DeviceConfig)
     suspend fun refreshSnapshot(deviceId: String)
+    suspend fun applyIronLimitToAll(minutes: Int)
 }

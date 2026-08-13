@@ -242,6 +242,21 @@ class FirebaseDeviceDataSource @Inject constructor(
         ).await()
     }
 
+    suspend fun applyIronLimitToAll(minutes: Int) {
+        val devicesRef = db.getReference(Constants.DbPaths.devices())
+        val snapshot = devicesRef.get().await()
+        val updates = mutableMapOf<String, Any?>()
+        for (child in snapshot.children) {
+            val type = child.child("type").getValue(String::class.java)
+            if (type == "IRON") {
+                updates["${child.key}/config/maxActiveMinutes"] = minutes
+            }
+        }
+        if (updates.isNotEmpty()) {
+            devicesRef.updateChildren(updates).await()
+        }
+    }
+
     private fun randomDeviceId(length: Int = 8): String {
         val chars = "abcdefghijklmnopqrstuvwxyz0123456789"
         return (1..length).map { chars.random() }.joinToString("")

@@ -87,7 +87,7 @@ Realtime Database console → ⋮ → *Import JSON* to bootstrap the project.
             "lastOnAt": 0,
             "lastChangedBy": "android"
           },
-          "config": { "maxActiveMinutes": 15, "wattage": 1000 }
+          "config": { "maxActiveMinutes": 1, "wattage": 1000 }
         },
 
         "dev_panel_hall": {
@@ -148,7 +148,7 @@ Realtime Database console → ⋮ → *Import JSON* to bootstrap the project.
           "message": "Iron was automatically turned OFF after exceeding the 15 min safety limit.",
           "timestamp": 1786276800000,
           "severity": "CRITICAL",
-          "isRead": false
+          "read": false
         },
         "alert_camera_motion": {
           "deviceId": "dev_cam_porch",
@@ -156,7 +156,7 @@ Realtime Database console → ⋮ → *Import JSON* to bootstrap the project.
           "message": "Motion detected at the porch camera.",
           "timestamp": 1786273200000,
           "severity": "SECURITY",
-          "isRead": false
+          "read": false
         },
         "alert_garden_light": {
           "deviceId": "dev_light_garden",
@@ -164,7 +164,7 @@ Realtime Database console → ⋮ → *Import JSON* to bootstrap the project.
           "message": "Garden light turned ON automatically by schedule.",
           "timestamp": 1786266000000,
           "severity": "INFO",
-          "isRead": false
+          "read": false
         },
         "alert_panel_hall": {
           "deviceId": "dev_panel_hall",
@@ -172,7 +172,7 @@ Realtime Database console → ⋮ → *Import JSON* to bootstrap the project.
           "message": "Hall switch panel gang 2 was toggled.",
           "timestamp": 1786176000000,
           "severity": "ROUTINE",
-          "isRead": true
+          "read": true
         }
       }
     }
@@ -210,7 +210,7 @@ functions (defined in `core/util/Constants.kt` and `js/config/firebase-config.js
 | `.../config/wattage` | App / seed data | `usageLogger` | For the energy estimate |
 | `homes/{id}/schedules/{scheduleId}` | App (Schedule screen) | `scheduleRunner`, App | One schedule per device is enough |
 | `homes/{id}/usage/{deviceId}/{yyyy-MM-dd}` | **`usageLogger` / `safetyMonitor`** | App (Reports) | Pre-aggregated daily totals: `activeMinutes`, `sessions`, `energyWh`, `autoCutoffs` |
-| `homes/{id}/alerts/{alertId}` | `safetyMonitor` (cutoffs), App (user events) | App (Alerts) | Notification log: `title`, `message`, `severity` (CRITICAL/SECURITY/INFO/ROUTINE), `deviceId`, `timestamp`, `isRead` |
+| `homes/{id}/alerts/{alertId}` | `safetyMonitor` (cutoffs), App (user events) | App (Alerts) | Notification log: `title`, `message`, `severity` (CRITICAL/SECURITY/INFO/ROUTINE), `deviceId`, `timestamp`, `read` |
 | `users/{uid}` | App on first sign-in | App | Maps anonymous uid → homeId |
 
 **Rule of thumb:** the app owns *structure* (floors, devices, schedules, config), the

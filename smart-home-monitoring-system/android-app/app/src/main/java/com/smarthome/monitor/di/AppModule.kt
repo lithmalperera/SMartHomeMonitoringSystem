@@ -27,6 +27,9 @@ import com.smarthome.monitor.domain.repository.SettingsRepository
 import com.smarthome.monitor.data.repository.AlertRepositoryImpl
 import com.smarthome.monitor.domain.repository.AlertRepository
 
+import com.smarthome.monitor.data.repository.ScheduleRepositoryImpl
+import com.smarthome.monitor.domain.repository.ScheduleRepository
+
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class AppModule {
@@ -72,6 +75,12 @@ abstract class AppModule {
     abstract fun bindAlertRepository(
         impl: AlertRepositoryImpl
     ): AlertRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindScheduleRepository(
+        impl: ScheduleRepositoryImpl
+    ): ScheduleRepository
 
     companion object {
         @Provides
