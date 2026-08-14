@@ -44,11 +44,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material3.Slider
+import coil.compose.AsyncImage
 import com.smarthome.monitor.data.model.DeviceType
 import com.smarthome.monitor.ui.components.DeviceIcon
 import com.smarthome.monitor.ui.components.deviceStatusLabel
@@ -302,6 +305,16 @@ fun DevicePlacementScreen(
                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
                         .padding(8.dp)
                 ) {
+                    if (!grid.imageUrl.isNullOrBlank()) {
+                        AsyncImage(
+                            model = grid.imageUrl,
+                            contentDescription = "Floor plan",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                         val cols = grid.gridColumns.coerceAtLeast(1)
                         val rows = grid.gridRows.coerceAtLeast(1)
@@ -318,8 +331,8 @@ fun DevicePlacementScreen(
                                     .padding(2.dp)
                                     .clip(RoundedCornerShape(4.dp))
                                     .background(
-                                        if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                                        else MaterialTheme.colorScheme.surfaceContainerLowest
+                                        if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
+                                        else Color.White.copy(alpha = 0.35f)
                                     )
                                     .border(
                                         width = if (isSelected) 2.dp else 1.dp,

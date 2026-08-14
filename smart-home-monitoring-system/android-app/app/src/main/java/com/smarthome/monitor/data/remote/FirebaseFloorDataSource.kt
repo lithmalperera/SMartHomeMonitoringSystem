@@ -25,7 +25,8 @@ class FirebaseFloorDataSource @Inject constructor(
                 for (child in snapshot.children) {
                     val floor = child.getValue(Floor::class.java)
                     if (floor != null) {
-                        floors.add(floor.copy(id = child.key ?: ""))
+                        val remoteImageUrl = floor.imageUrl?.takeIf { it.startsWith("https://") }
+                        floors.add(floor.copy(id = child.key ?: "", imageUrl = remoteImageUrl))
                     }
                 }
                 floors.sortBy { it.order }

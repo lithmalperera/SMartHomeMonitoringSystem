@@ -6,4 +6,6 @@ import kotlinx.coroutines.flow.Flow
 interface FloorRepository {
     fun observeFloors(): Flow<List<Floor>>
     suspend fun addFloor(name: String, order: Int, gridColumns: Int, gridRows: Int, imageUrl: String?)
+    suspend fun cacheFloorImage(contentUri: String): String?
+    suspend fun uploadFloorImage(localImage: String): String?
 }
