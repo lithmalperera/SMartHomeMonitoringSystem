@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +39,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -72,12 +74,14 @@ fun FloorSetupScreen(
     var floorName by remember { mutableStateOf("Ground Floor") }
     var rows by remember { mutableIntStateOf(12) }
     var cols by remember { mutableIntStateOf(12) }
-    var imageUrl by remember { mutableStateOf<String?>(null) }
+    val pickedImagePath by viewModel.pickedImagePath.collectAsState()
+    val isSaving by viewModel.isSaving.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        imageUrl = uri?.toString()
+        uri?.let { viewModel.onImagePicked(it.toString()) }
     }
 
     val primaryBlue = Color(0xFF0047AB)
@@ -116,35 +120,64 @@ fun FloorSetupScreen(
                 color = Color.White,
                 shadowElevation = 8.dp
             ) {
-                Button(
-                    onClick = {
-                        viewModel.saveFloor(floorName, rows, cols, imageUrl, onSuccess = onSave)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 16.dp)
-                        .height(56.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = primaryBlue
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                Column {
+                    if (errorMessage != null) {
                         Text(
-                            "Save & Continue",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
+                            text = errorMessage ?: "",
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 13.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 8.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
+                    }
+                    Button(
+                        onClick = {
+                            viewModel.saveFloor(floorName, rows, cols, onSuccess = onSave)
+                        },
+                        enabled = !isSaving,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 16.dp)
+                            .height(56.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = primaryBlue,
+                            disabledContainerColor = primaryBlue.copy(alpha = 0.6f),
+                            disabledContentColor = Color.White
                         )
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (isSaving) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp,
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    "Uploading...",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                )
+                            } else {
+                                Text(
+                                    "Save & Continue",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -189,7 +222,7 @@ fun FloorSetupScreen(
                     color = Color(0xFF1A1A1A)
                 )
                 UploadArea(
-                    imageUrl = imageUrl,
+                    imageUrl = pickedImagePath,
                     onUploadClick = { imagePickerLauncher.launch("image/*") },
                     modifier = Modifier.fillMaxWidth()
                 )

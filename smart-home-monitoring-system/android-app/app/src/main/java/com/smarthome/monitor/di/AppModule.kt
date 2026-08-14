@@ -2,6 +2,7 @@ package com.smarthome.monitor.di
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
 import com.smarthome.monitor.data.repository.ActivityRepositoryImpl
 import com.smarthome.monitor.data.repository.AuthRepositoryImpl
 import com.smarthome.monitor.data.repository.FloorRepositoryImpl
@@ -93,6 +94,12 @@ abstract class AppModule {
         @Singleton
         fun provideFirebaseAuth(): FirebaseAuth {
             return FirebaseAuth.getInstance()
+        }
+
+        @Provides
+        @Singleton
+        fun provideFirebaseStorage(): FirebaseStorage {
+            return FirebaseStorage.getInstance()
         }
     }
 }
