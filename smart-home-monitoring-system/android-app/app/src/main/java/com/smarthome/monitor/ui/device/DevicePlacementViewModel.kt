@@ -18,7 +18,8 @@ import javax.inject.Inject
 
 data class GridInfo(
     val gridColumns: Int = 8,
-    val gridRows: Int = 8
+    val gridRows: Int = 8,
+    val imageUrl: String? = null
 )
 
 @HiltViewModel
@@ -41,7 +42,8 @@ class DevicePlacementViewModel @Inject constructor(
                 if (floor != null) {
                     _grid.value = GridInfo(
                         gridColumns = floor.gridColumns,
-                        gridRows = floor.gridRows
+                        gridRows = floor.gridRows,
+                        imageUrl = floor.imageUrl
                     )
                 }
             } catch (e: Exception) {

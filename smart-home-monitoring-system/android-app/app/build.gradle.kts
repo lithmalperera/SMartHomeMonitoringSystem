@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.firebase.database)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.storage)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
