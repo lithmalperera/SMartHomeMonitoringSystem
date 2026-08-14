@@ -72,11 +72,11 @@ fun BottomNavBar(
                     onClick = { onItemSelected(item) },
                     color = containerColor,
                     contentColor = contentColor,
-                    shape = RoundedCornerShape(percent = 50),
+                    shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
-                        .clip(RoundedCornerShape(percent = 50))
+                        .clip(RoundedCornerShape(12.dp))
                         .weight(1f)
-                        .padding(horizontal = 4.dp)
+                        .padding(horizontal = 4.dp, vertical = 2.dp)
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
