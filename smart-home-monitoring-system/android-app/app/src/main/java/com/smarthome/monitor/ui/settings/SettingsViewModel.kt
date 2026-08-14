@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,7 +27,15 @@ data class SettingsUiState(
     val notificationsEnabled: Boolean = true,
     val ironLimitMinutes: Int = 15,
     val isLoggingOut: Boolean = false,
-    val isOnline: Boolean = true
+    val isOnline: Boolean = true,
+    val isSyncing: Boolean = false,
+    val lastSyncText: String = "—"
+)
+
+private data class SyncState(
+    val isOnline: Boolean = true,
+    val isSyncing: Boolean = false,
+    val lastSyncText: String = "—"
 )
 
 @HiltViewModel
@@ -38,12 +47,13 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val loggingOutFlow = MutableStateFlow(false)
-    private val connectionFlow = MutableStateFlow(true)
+    private val syncFlow = MutableStateFlow(SyncState())
 
     init {
         db.getReference(".info/connected").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                connectionFlow.value = snapshot.getValue(Boolean::class.java) ?: false
+                val online = snapshot.getValue(Boolean::class.java) ?: false
+                syncFlow.value = syncFlow.value.copy(isOnline = online)
             }
 
             override fun onCancelled(error: DatabaseError) {}
@@ -55,15 +65,17 @@ class SettingsViewModel @Inject constructor(
         settingsRepository.ironLimitMinutes,
         settingsRepository.userName,
         loggingOutFlow,
-        connectionFlow
-    ) { notificationsEnabled, ironLimitMinutes, userName, isLoggingOut, isOnline ->
+        syncFlow
+    ) { notificationsEnabled, ironLimitMinutes, userName, isLoggingOut, sync ->
         SettingsUiState(
             isLoading = false,
             userName = userName,
             notificationsEnabled = notificationsEnabled,
             ironLimitMinutes = ironLimitMinutes,
             isLoggingOut = isLoggingOut,
-            isOnline = isOnline
+            isOnline = sync.isOnline,
+            isSyncing = sync.isSyncing,
+            lastSyncText = sync.lastSyncText
         )
     }.stateIn(
         scope = viewModelScope,
@@ -101,7 +113,13 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun syncNow() {
+        if (syncFlow.value.isSyncing) return
         db.goOnline()
+        viewModelScope.launch {
+            syncFlow.value = syncFlow.value.copy(isSyncing = true, lastSyncText = "—")
+            delay(1500)
+            syncFlow.value = syncFlow.value.copy(isSyncing = false, lastSyncText = "Just now")
+        }
     }
 
     fun logout(onComplete: () -> Unit) {

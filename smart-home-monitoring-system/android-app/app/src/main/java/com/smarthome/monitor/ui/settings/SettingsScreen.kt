@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -107,6 +108,8 @@ fun SettingsScreen(
                 ProfileCard(name = uiState.userName)
                 SyncCard(
                     isOnline = uiState.isOnline,
+                    isSyncing = uiState.isSyncing,
+                    lastSyncText = uiState.lastSyncText,
                     onSyncNow = { viewModel.syncNow() }
                 )
                 SettingsGroup(title = "Preferences") {
@@ -261,7 +264,12 @@ private fun ProfileCard(name: String) {
 }
 
 @Composable
-private fun SyncCard(isOnline: Boolean, onSyncNow: () -> Unit) {
+private fun SyncCard(
+    isOnline: Boolean,
+    isSyncing: Boolean,
+    lastSyncText: String,
+    onSyncNow: () -> Unit
+) {
     Surface(
         color = if (isOnline) MaterialTheme.colorScheme.primaryContainer
         else MaterialTheme.colorScheme.errorContainer,
@@ -280,16 +288,29 @@ private fun SyncCard(isOnline: Boolean, onSyncNow: () -> Unit) {
             ) {
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.CloudDone,
-                            contentDescription = null,
-                            tint = if (isOnline) MaterialTheme.colorScheme.onPrimaryContainer
-                            else MaterialTheme.colorScheme.onErrorContainer,
-                            modifier = Modifier.size(20.dp)
-                        )
+                        if (isSyncing) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp,
+                                color = if (isOnline) MaterialTheme.colorScheme.onPrimaryContainer
+                                else MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.CloudDone,
+                                contentDescription = null,
+                                tint = if (isOnline) MaterialTheme.colorScheme.onPrimaryContainer
+                                else MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (isOnline) "Cloud Sync: Active" else "Cloud Sync: Offline",
+                            text = when {
+                                isSyncing -> "Syncing…"
+                                isOnline -> "Cloud Sync: Active"
+                                else -> "Cloud Sync: Offline"
+                            },
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             color = if (isOnline) MaterialTheme.colorScheme.onPrimaryContainer
@@ -297,7 +318,11 @@ private fun SyncCard(isOnline: Boolean, onSyncNow: () -> Unit) {
                         )
                     }
                     Text(
-                        text = if (isOnline) "Realtime · connected" else "Tap to reconnect",
+                        text = when {
+                            isSyncing -> "Reconnecting to Firebase…"
+                            isOnline -> "Last synced $lastSyncText"
+                            else -> "Tap to reconnect"
+                        },
                         fontSize = 12.sp,
                         color = if (isOnline) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                         else MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f),
@@ -310,14 +335,27 @@ private fun SyncCard(isOnline: Boolean, onSyncNow: () -> Unit) {
                     else MaterialTheme.colorScheme.onErrorContainer,
                     shape = RoundedCornerShape(percent = 50)
                 ) {
-                    Text(
-                        text = "Sync Now",
-                        color = if (isOnline) MaterialTheme.colorScheme.primaryContainer
-                        else MaterialTheme.colorScheme.errorContainer,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        if (isSyncing) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(12.dp),
+                                strokeWidth = 2.dp,
+                                color = if (isOnline) MaterialTheme.colorScheme.primaryContainer
+                                else MaterialTheme.colorScheme.errorContainer
+                            )
+                        }
+                        Text(
+                            text = if (isSyncing) "Syncing" else "Sync Now",
+                            color = if (isOnline) MaterialTheme.colorScheme.primaryContainer
+                            else MaterialTheme.colorScheme.errorContainer,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
             Box(
