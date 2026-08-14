@@ -79,7 +79,7 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            SettingsTopBar()
+            SettingsTopBar(onNotificationsClick = onAlertsClick)
         },
         bottomBar = {
             BottomNavBar(
@@ -106,7 +106,10 @@ fun SettingsScreen(
                     .padding(horizontal = 20.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                ProfileCard(name = uiState.userName)
+                ProfileCard(
+                    name = uiState.userName,
+                    onClick = onAccountSettings
+                )
                 SyncCard(
                     isOnline = uiState.isOnline,
                     isSyncing = uiState.isSyncing,
@@ -195,7 +198,7 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun SettingsTopBar() {
+private fun SettingsTopBar(onNotificationsClick: () -> Unit) {
     Surface(color = MaterialTheme.colorScheme.surface) {
         Row(
             modifier = Modifier
@@ -215,7 +218,7 @@ private fun SettingsTopBar() {
                     fontWeight = FontWeight.Bold
                 )
             }
-            IconButton(onClick = { }) {
+            IconButton(onClick = onNotificationsClick) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Notifications",
@@ -227,8 +230,9 @@ private fun SettingsTopBar() {
 }
 
 @Composable
-private fun ProfileCard(name: String) {
+private fun ProfileCard(name: String, onClick: () -> Unit) {
     Surface(
+        onClick = onClick,
         color = MaterialTheme.colorScheme.surfaceContainerLowest,
         shape = RoundedCornerShape(12.dp),
         border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
@@ -254,7 +258,7 @@ private fun ProfileCard(name: String) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            IconButton(onClick = { }) {
+            IconButton(onClick = onClick) {
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
                     contentDescription = "Edit",

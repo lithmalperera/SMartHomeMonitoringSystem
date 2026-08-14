@@ -1,7 +1,6 @@
 package com.smarthome.monitor.ui.reports
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +20,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Notifications
@@ -72,7 +70,7 @@ fun ReportsScreen(
 
     Scaffold(
         topBar = {
-            ReportsTopBar()
+            ReportsTopBar(onNotificationsClick = onAlertsClick)
         },
         bottomBar = {
             BottomNavBar(
@@ -194,23 +192,6 @@ fun ReportsScreen(
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable { }
-                        ) {
-                            Text(
-                                text = "View Logs",
-                                color = MaterialTheme.colorScheme.primary,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.OpenInNew,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     if (uiState.history.isEmpty()) {
@@ -360,7 +341,7 @@ private fun LegendItem(color: androidx.compose.ui.graphics.Color, label: String)
 }
 
 @Composable
-private fun ReportsTopBar() {
+private fun ReportsTopBar(onNotificationsClick: () -> Unit) {
     Surface(color = MaterialTheme.colorScheme.surface) {
         Row(
             modifier = Modifier
@@ -380,7 +361,7 @@ private fun ReportsTopBar() {
                     fontWeight = FontWeight.Bold
                 )
             }
-            IconButton(onClick = { }) {
+            IconButton(onClick = onNotificationsClick) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Notifications",

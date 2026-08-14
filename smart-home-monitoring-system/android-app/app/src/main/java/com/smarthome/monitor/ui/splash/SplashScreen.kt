@@ -25,10 +25,6 @@ fun SplashScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Smart Home", fontSize = 28.sp)
-            Spacer(modifier = Modifier.height(16.dp))
-            LoadingBox()
-        }
+        LoadingBox()
     }
 }

@@ -133,13 +133,6 @@ private fun AlertsTopBar(alertBadge: Boolean) {
                 )
             }
             Row {
-                IconButton(onClick = { }) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
                 Box {
                     IconButton(onClick = { }) {
                         Icon(

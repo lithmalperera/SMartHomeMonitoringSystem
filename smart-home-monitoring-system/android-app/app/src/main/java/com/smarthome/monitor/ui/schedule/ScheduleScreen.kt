@@ -76,7 +76,7 @@ fun ScheduleScreen(
 
     Scaffold(
         topBar = {
-            ScheduleTopBar()
+            ScheduleTopBar(onNotificationsClick = onAlertsClick)
         },
         bottomBar = {
             BottomNavBar(
@@ -145,7 +145,7 @@ fun ScheduleScreen(
 }
 
 @Composable
-private fun ScheduleTopBar() {
+private fun ScheduleTopBar(onNotificationsClick: () -> Unit) {
     Surface(color = MaterialTheme.colorScheme.surface) {
         Row(
             modifier = Modifier
@@ -165,7 +165,7 @@ private fun ScheduleTopBar() {
                     fontWeight = FontWeight.Bold
                 )
             }
-            IconButton(onClick = { }) {
+            IconButton(onClick = onNotificationsClick) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Notifications",
