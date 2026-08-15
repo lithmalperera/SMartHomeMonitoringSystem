@@ -1,5 +1,6 @@
 package com.smarthome.monitor.ui.alerts
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -47,17 +48,18 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.smarthome.monitor.R
 import com.smarthome.monitor.core.util.DateUtils
 import com.smarthome.monitor.data.model.Alert
 import com.smarthome.monitor.data.model.AlertSeverity
 import com.smarthome.monitor.ui.components.BottomNavBar
 import com.smarthome.monitor.ui.components.BottomNavItem
 import com.smarthome.monitor.ui.components.LoadingBox
-import com.smarthome.monitor.ui.components.ProfileAvatar
 
 private val filters = listOf("All", "Unread", "Device Type", "Critical")
 
@@ -123,7 +125,11 @@ private fun AlertsTopBar(alertBadge: Boolean) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ProfileAvatar(size = 40)
+                Image(
+                    painter = painterResource(id = R.drawable.ic_logo),
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp)
+                )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = "Alerts",

@@ -70,7 +70,6 @@ import com.smarthome.monitor.data.model.Floor
 import com.smarthome.monitor.ui.components.BottomNavBar
 import com.smarthome.monitor.ui.components.BottomNavItem
 import com.smarthome.monitor.ui.components.LoadingBox
-import com.smarthome.monitor.ui.components.ProfileAvatar
 import coil.compose.AsyncImage
 
 import androidx.compose.runtime.mutableStateOf
@@ -157,10 +156,14 @@ private fun HomeTopBar(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ProfileAvatar(size = 40)
+                Image(
+                    painter = painterResource(id = R.drawable.ic_logo),
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp)
+                )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Lumina Home",
+                    text = "Hestia",
                     style = MaterialTheme.typography.titleLarge,
                     color = Color(0xFF0047AB),
                     fontWeight = FontWeight.Bold
@@ -222,6 +225,8 @@ private fun HomeContent(
         
         FloorsSection(
             floors = uiState.floors,
+            deviceCounts = uiState.floorDeviceCounts,
+            onlineStates = uiState.floorOnlineStates,
             onFloorSelected = onFloorSelected,
             onAddFloor = onAddFloor
         )
@@ -478,6 +483,8 @@ private fun AlertsSection(alerts: List<Alert>, onAlertsClick: () -> Unit) {
 @Composable
 private fun FloorsSection(
     floors: List<Floor>,
+    deviceCounts: Map<String, Int>,
+    onlineStates: Map<String, Boolean>,
     onFloorSelected: (String) -> Unit,
     onAddFloor: () -> Unit
 ) {
@@ -500,14 +507,19 @@ private fun FloorsSection(
         Spacer(modifier = Modifier.height(12.dp))
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             floors.forEach { floor ->
-                FloorListItem(floor = floor, onClick = { onFloorSelected(floor.id) })
+                FloorListItem(
+                    floor = floor,
+                    deviceCount = deviceCounts[floor.id] ?: 0,
+                    isOnline = onlineStates[floor.id] ?: false,
+                    onClick = { onFloorSelected(floor.id) }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun FloorListItem(floor: Floor, onClick: () -> Unit) {
+private fun FloorListItem(floor: Floor, deviceCount: Int, isOnline: Boolean, onClick: () -> Unit) {
     val floorNameLower = floor.name.lowercase()
     val imageRes = when {
         floorNameLower.contains("ground") -> R.drawable.ground_floor
@@ -576,16 +588,15 @@ private fun FloorListItem(floor: Floor, onClick: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     
-                    val isOffline = floorNameLower.contains("garage") || floorNameLower.contains("basement")
                     Surface(
-                        color = if (isOffline) Color(0xFFFFF3E0) else Color(0xFFE8F5E9),
+                        color = if (!isOnline) Color(0xFFFFF3E0) else Color(0xFFE8F5E9),
                         shape = RoundedCornerShape(4.dp)
                     ) {
                         Text(
-                            text = if (isOffline) "• Offline" else "• Online",
+                            text = if (!isOnline) "• Offline" else "• Online",
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                             fontSize = 11.sp,
-                            color = if (isOffline) Color(0xFFFF9800) else Color(0xFF4CAF50),
+                            color = if (!isOnline) Color(0xFFFF9800) else Color(0xFF4CAF50),
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -599,12 +610,6 @@ private fun FloorListItem(floor: Floor, onClick: () -> Unit) {
                         tint = Color.Gray
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    val deviceCount = when {
-                        floorNameLower.contains("ground") -> 12
-                        floorNameLower.contains("first") -> 8
-                        floorNameLower.contains("garage") -> 4
-                        else -> 6
-                    }
                     Text(
                         text = "$deviceCount Devices",
                         fontSize = 13.sp,

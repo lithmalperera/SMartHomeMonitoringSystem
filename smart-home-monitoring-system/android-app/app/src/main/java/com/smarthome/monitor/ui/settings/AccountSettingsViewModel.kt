@@ -16,7 +16,7 @@ data class AccountSettingsUiState(
     val userName: String = "Videesha",
     val userId: String = "—",
     val homeId: String = Constants.HOME_ID,
-    val homeName: String = "Lumina Home",
+    val homeName: String = "Hestia",
     val signInMethod: String = "Anonymous",
     val appVersion: String = "v2.4.8"
 )

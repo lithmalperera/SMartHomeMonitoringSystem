@@ -14,13 +14,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Hardware Simulator Dashboard — IoT Smart Home Rig" },
+      { title: "Hardware Simulator Dashboard — IoT Hestia" },
       {
         name: "description",
         content:
           "Admin simulator for smart home hardware: floor grids, outlets, multi-switches, hazard timers, cameras and a live event log.",
       },
-      { property: "og:title", content: "Hardware Simulator Dashboard — IoT Smart Home Rig" },
+      { property: "og:title", content: "Hardware Simulator Dashboard — IoT Hestia" },
       {
         property: "og:description",
         content: "Simulate and monitor smart home devices across floors with live status and event logging.",

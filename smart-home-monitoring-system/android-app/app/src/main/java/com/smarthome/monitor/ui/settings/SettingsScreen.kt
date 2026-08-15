@@ -1,5 +1,6 @@
 package com.smarthome.monitor.ui.settings
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,10 +54,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.smarthome.monitor.R
 import com.smarthome.monitor.ui.components.BottomNavBar
 import com.smarthome.monitor.ui.components.BottomNavItem
 import com.smarthome.monitor.ui.components.LoadingBox
@@ -157,7 +160,7 @@ fun SettingsScreen(
                     )
                 }
                 SettingsGroup(title = "System") {
-                    AboutRow(label = "About Lumina", value = "v2.4.8 (Enterprise)")
+                    AboutRow(label = "About Hestia", value = "v2.4.8 (Enterprise)")
                     AboutRow(label = "Terms of Service", value = "", showExternal = true)
                     AboutRow(label = "Privacy Policy", value = "", showExternal = true)
                 }
@@ -209,7 +212,11 @@ private fun SettingsTopBar(onNotificationsClick: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ProfileAvatar(size = 40)
+                Image(
+                    painter = painterResource(id = R.drawable.ic_logo),
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp)
+                )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = "Settings",

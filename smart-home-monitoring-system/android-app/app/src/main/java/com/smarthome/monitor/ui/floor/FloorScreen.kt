@@ -1,5 +1,6 @@
 package com.smarthome.monitor.ui.floor
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,10 +46,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.smarthome.monitor.R
 import com.smarthome.monitor.core.util.DeviceStatus
 import com.smarthome.monitor.core.util.status
 import com.smarthome.monitor.data.model.Device
@@ -57,7 +60,6 @@ import com.smarthome.monitor.ui.components.BottomNavBar
 import com.smarthome.monitor.ui.components.BottomNavItem
 import com.smarthome.monitor.ui.components.DeviceIcon
 import com.smarthome.monitor.ui.components.LoadingBox
-import com.smarthome.monitor.ui.components.ProfileAvatar
 
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
@@ -231,7 +233,11 @@ private fun FloorTopBar(
                     }
                 }
                 Spacer(modifier = Modifier.width(8.dp))
-                ProfileAvatar(size = 32)
+                Image(
+                    painter = painterResource(id = R.drawable.ic_logo),
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp)
+                )
             }
         }
     }
@@ -341,16 +347,18 @@ private fun FloorCanvas(
 private fun DeviceNode(device: Device, modifier: Modifier = Modifier) {
     val status = device.status()
     val (borderColor, iconTint) = when (status) {
-        DeviceStatus.ON -> MaterialTheme.colorScheme.primary to MaterialTheme.colorScheme.primary
+        DeviceStatus.ON -> Color(0xFFFFC107) to Color(0xFFFFC107)
         DeviceStatus.ERROR -> MaterialTheme.colorScheme.error to MaterialTheme.colorScheme.error
         DeviceStatus.DISCONNECTED -> MaterialTheme.colorScheme.outline to MaterialTheme.colorScheme.outline
         DeviceStatus.OFF -> MaterialTheme.colorScheme.outlineVariant to MaterialTheme.colorScheme.secondary
     }
     val containerColor = when (status) {
+        DeviceStatus.ON -> Color(0xFFFFF9C4)
         DeviceStatus.ERROR -> MaterialTheme.colorScheme.errorContainer
         else -> MaterialTheme.colorScheme.surface
     }
     val labelTextColor = when (status) {
+        DeviceStatus.ON -> Color(0xFF795548)
         DeviceStatus.ERROR -> MaterialTheme.colorScheme.onErrorContainer
         else -> MaterialTheme.colorScheme.onSurface
     }
@@ -362,7 +370,7 @@ private fun DeviceNode(device: Device, modifier: Modifier = Modifier) {
         Surface(
             shape = CircleShape,
             color = containerColor,
-            shadowElevation = 4.dp,
+            shadowElevation = 6.dp,
             modifier = Modifier.size(48.dp)
         ) {
             Box(
@@ -377,7 +385,7 @@ private fun DeviceNode(device: Device, modifier: Modifier = Modifier) {
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surface)
+                        .background(if (status == DeviceStatus.ON) Color(0xFFFFFDE7) else MaterialTheme.colorScheme.surface)
                 ) {
                     DeviceIcon(
                         type = device.type,

@@ -1,4 +1,4 @@
-import { Building2, Layers, Plus } from "lucide-react";
+import { Building2, Plus } from "lucide-react";
 import { useSimulator } from "@/lib/simulator-store";
 
 export function FloorSidebar({ onAddFloor }: { onAddFloor: () => void }) {
@@ -7,13 +7,13 @@ export function FloorSidebar({ onAddFloor }: { onAddFloor: () => void }) {
   return (
     <aside className="flex w-full shrink-0 flex-col bg-sidebar text-sidebar-foreground md:h-full md:w-64 md:border-r md:border-sidebar-border">
       <div className="flex items-center gap-2 border-b border-sidebar-border px-4 py-4">
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-          <Layers className="h-4 w-4" />
-        </span>
+        <div className="h-10 w-10 shrink-0">
+          <img src="/ic_logo.png" alt="Hestia Logo" className="h-full w-full object-contain" />
+        </div>
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold">Hardware Simulator</p>
           <p className="truncate font-mono text-[10px] uppercase tracking-[0.16em] text-sidebar-foreground/50">
-            smart home rig
+            Hestia
           </p>
         </div>
       </div>

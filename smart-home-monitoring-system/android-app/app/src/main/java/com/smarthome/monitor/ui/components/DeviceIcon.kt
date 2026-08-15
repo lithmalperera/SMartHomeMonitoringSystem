@@ -1,6 +1,7 @@
 package com.smarthome.monitor.ui.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Iron
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Power
@@ -44,7 +45,7 @@ fun deviceIconVector(type: DeviceType): ImageVector? = when (type) {
     DeviceType.CAMERA -> Icons.Default.Videocam
     DeviceType.LOCK -> Icons.Default.Lock
     DeviceType.THERMOSTAT -> Icons.Default.Thermostat
-    DeviceType.IRON -> null
+    DeviceType.IRON -> Icons.Default.Iron
 }
 
 fun deviceIconEmoji(type: DeviceType): String = when (type) {

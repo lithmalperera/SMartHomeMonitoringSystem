@@ -56,7 +56,7 @@ fun BottomNavBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(72.dp)
+                .height(64.dp)
                 .selectableGroup()
                 .padding(horizontal = 8.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -76,23 +76,23 @@ fun BottomNavBar(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .weight(1f)
-                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                        .padding(horizontal = 2.dp, vertical = 2.dp)
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        modifier = Modifier.padding(vertical = 2.dp)
                     ) {
                         Icon(
                             imageVector = icon,
                             contentDescription = item.label,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(22.dp)
                         )
                         Text(
                             text = item.label,
-                            fontSize = 11.sp,
+                            fontSize = 10.sp,
                             fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
-                            modifier = Modifier.padding(top = 2.dp)
+                            modifier = Modifier.padding(top = 0.dp)
                         )
                         if (item == BottomNavItem.ALERTS && alertBadge) {
                             Surface(

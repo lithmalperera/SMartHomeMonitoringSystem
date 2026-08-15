@@ -53,7 +53,9 @@ data class HomeUiState(
     val onCount: Int = 0,
     val errorCount: Int = 0,
     val unreadAlerts: List<Alert> = emptyList(),
-    val recentActivities: List<RecentActivity> = emptyList()
+    val recentActivities: List<RecentActivity> = emptyList(),
+    val floorDeviceCounts: Map<String, Int> = emptyMap(),
+    val floorOnlineStates: Map<String, Boolean> = emptyMap()
 )
 
 @HiltViewModel
@@ -117,10 +119,16 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = combine(
         floorRepository.observeFloors(),
         activityRepository.observeActivities(),
-        alertRepository.observeAlerts()
-    ) { floorsList, activitiesList, alerts ->
+        alertRepository.observeAlerts(),
+        deviceRepository.observeDevices()
+    ) { floorsList, activitiesList, alerts, devices ->
         val currentDate = SimpleDateFormat("EEEE, dd MMMM yyyy", Locale.getDefault()).format(Date())
         val currentTime = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date())
+        
+        val counts = devices.groupBy { it.floorId }.mapValues { it.value.size }
+        val onlineStates = devices.groupBy { it.floorId }.mapValues { entry ->
+            entry.value.any { it.state.online }
+        }
 
         HomeUiState(
             isLoading = false,
@@ -129,12 +137,14 @@ class HomeViewModel @Inject constructor(
             time = currentTime,
             lastSync = "Just now",
             floorsCount = floorsList.size,
-            totalDevices = floorsList.size * 4,
-            onlineCount = floorsList.size * 3,
+            totalDevices = devices.size,
+            onlineCount = devices.count { it.state.online },
             alertsCount = alerts.count { !it.read },
             unreadAlerts = alerts.filter { !it.read },
             properties = _properties,
             floors = floorsList,
+            floorDeviceCounts = counts,
+            floorOnlineStates = onlineStates,
             recentActivities = activitiesList.map { dbActivity ->
                 RecentActivity(
                     id = dbActivity.id,

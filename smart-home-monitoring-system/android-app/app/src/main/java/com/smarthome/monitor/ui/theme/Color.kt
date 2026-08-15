@@ -2,7 +2,7 @@ package com.smarthome.monitor.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Lumina Home color palette (light mode)
+// Hestia color palette (light mode)
 
 val Primary = Color(0xFF004AC6)
 val OnPrimary = Color(0xFFFFFFFF)
