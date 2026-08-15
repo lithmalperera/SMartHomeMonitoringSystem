@@ -222,7 +222,7 @@ fun FloorSetupScreen(
                     color = Color(0xFF1A1A1A)
                 )
                 UploadArea(
-                    imageUrl = pickedImagePath,
+                    image = pickedImagePath?.let { java.io.File(it) },
                     onUploadClick = { imagePickerLauncher.launch("image/*") },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -268,7 +268,7 @@ fun FloorSetupScreen(
 
 @Composable
 private fun UploadArea(
-    imageUrl: String?,
+    image: Any?,
     onUploadClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -291,9 +291,9 @@ private fun UploadArea(
             }
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-            if (imageUrl != null) {
+            if (image != null) {
                 AsyncImage(
-                    model = imageUrl,
+                    model = image,
                     contentDescription = "Selected floor plan blueprint",
                     modifier = Modifier.fillMaxSize().padding(8.dp).clip(RoundedCornerShape(8.dp)),
                     contentScale = ContentScale.Fit

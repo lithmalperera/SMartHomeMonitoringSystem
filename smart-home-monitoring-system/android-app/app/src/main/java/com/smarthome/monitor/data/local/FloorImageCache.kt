@@ -21,7 +21,7 @@ class FloorImageCache @Inject constructor(
                 "image/webp" -> "webp"
                 else -> "jpg"
             }
-            val dir = File(context.cacheDir, "floor_images").apply { mkdirs() }
+            val dir = File(context.filesDir, "floor_images_pending").apply { mkdirs() }
             val file = File(dir, "picked_${System.currentTimeMillis()}.$extension")
             context.contentResolver.openInputStream(uri)?.use { input ->
                 file.outputStream().use { output ->
@@ -30,6 +30,7 @@ class FloorImageCache @Inject constructor(
             }
             if (file.exists() && file.length() > 0) file.absolutePath else null
         } catch (e: Exception) {
+            android.util.Log.e("FloorImageCache", "cache failed", e)
             null
         }
     }

@@ -39,15 +39,13 @@ class FloorSetupViewModel @Inject constructor(
             _isSaving.value = true
             _errorMessage.value = null
             try {
-                val remoteImageUrl = _pickedImagePath.value?.let { path ->
-                    floorRepository.uploadFloorImage(path)
-                }
+                val localImagePath = _pickedImagePath.value
 
                 // Get the current floors to determine the next order index
                 val currentFloors = floorRepository.observeFloors().first()
                 val nextOrder = currentFloors.size
 
-                floorRepository.addFloor(name, nextOrder, cols, rows, remoteImageUrl)
+                floorRepository.addFloor(name, nextOrder, cols, rows, imageUrl = null, localImagePath = localImagePath)
 
                 // Log the activity to Firebase RTDB
                 activityRepository.logActivity(
@@ -58,13 +56,7 @@ class FloorSetupViewModel @Inject constructor(
 
                 onSuccess()
             } catch (e: Exception) {
-                _errorMessage.value = when {
-                    e.message?.contains("Object does not exist", ignoreCase = true) == true ->
-                        "The selected image is no longer accessible. Please pick it again and save."
-                    e.message?.contains("permission", ignoreCase = true) == true ->
-                        "Storage permission denied. Check the Firebase Storage security rules."
-                    else -> e.message ?: "Failed to save floor"
-                }
+                _errorMessage.value = e.message ?: "Failed to save floor"
             } finally {
                 _isSaving.value = false
             }

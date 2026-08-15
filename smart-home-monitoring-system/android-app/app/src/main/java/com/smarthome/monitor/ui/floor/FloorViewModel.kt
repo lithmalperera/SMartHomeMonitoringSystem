@@ -1,35 +1,37 @@
 package com.smarthome.monitor.ui.floor
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.smarthome.monitor.data.model.Device
-import com.smarthome.monitor.data.model.DeviceType
 import com.smarthome.monitor.data.model.Floor
-import com.smarthome.monitor.data.model.GridPosition
 import com.smarthome.monitor.domain.repository.DeviceRepository
 import com.smarthome.monitor.domain.repository.FloorRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 data class FloorUiState(
     val isLoading: Boolean = true,
     val floorName: String = "",
-    val imageUrl: String? = null,
-    val devices: List<Device> = emptyList(),
-    val alertsCount: Int = 0,
     val floors: List<Floor> = emptyList(),
+    val imageUrl: Any? = null,
+    val devices: List<Device> = emptyList(),
     val gridColumns: Int = 4,
-    val gridRows: Int = 4
+    val gridRows: Int = 4,
+    val alertsCount: Int = 0
 )
 
 @HiltViewModel
 class FloorViewModel @Inject constructor(
     private val floorRepository: FloorRepository,
-    private val deviceRepository: DeviceRepository
+    private val deviceRepository: DeviceRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(FloorUiState())
     val uiState: StateFlow<FloorUiState> = _uiState
@@ -49,12 +51,12 @@ class FloorViewModel @Inject constructor(
                     FloorUiState(
                         isLoading = false,
                         floorName = floor.name,
-                        imageUrl = floor.imageUrl,
-                        devices = floorDevices,
-                        alertsCount = floorDevices.count { it.state.error },
                         floors = floors,
+                        imageUrl = resolveFloorImage(floorId),
+                        devices = floorDevices,
                         gridColumns = floor.gridColumns,
-                        gridRows = floor.gridRows
+                        gridRows = floor.gridRows,
+                        alertsCount = floorDevices.count { it.state.error }
                     )
                 } else {
                     val mockName = when (floorId) {
@@ -66,14 +68,22 @@ class FloorViewModel @Inject constructor(
                     FloorUiState(
                         isLoading = false,
                         floorName = mockName,
+                        floors = floors,
                         devices = emptyList(),
-                        alertsCount = 0,
-                        floors = floors
+                        alertsCount = 0
                     )
                 }
             }.collect { newState ->
                 _uiState.value = newState
             }
         }
+    }
+
+    private fun resolveFloorImage(floorId: String): Any? {
+        val dir = File(context.filesDir, "floor_plans")
+        val file = dir.listFiles()?.firstOrNull { it.nameWithoutExtension == floorId }
+            ?.takeIf { it.exists() }
+        android.util.Log.d("FloorVM", "resolve floorId=$floorId found=$file")
+        return file
     }
 }

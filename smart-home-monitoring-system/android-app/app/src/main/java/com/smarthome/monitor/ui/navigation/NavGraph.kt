@@ -17,7 +17,6 @@ import com.smarthome.monitor.ui.schedule.ScheduleScreen
 import com.smarthome.monitor.ui.settings.AccountSettingsScreen
 import com.smarthome.monitor.ui.settings.SettingsScreen
 import com.smarthome.monitor.ui.splash.SplashScreen
-
 @Composable
 fun NavGraph(navController: NavHostController) {
     NavHost(navController = navController, startDestination = Routes.SPLASH) {
@@ -95,7 +94,7 @@ fun NavGraph(navController: NavHostController) {
                 deviceId = deviceId,
                 onBack = { navController.popBackStack() },
                 onHomeClick = { navController.navigate(Routes.HOME) { popUpTo(Routes.HOME) { inclusive = true } } },
-                onFloorClick = { navController.navigate(Routes.floor("floor_ground")) { popUpTo(Routes.HOME) } },
+                onFloorClick = { navController.navigate(Routes.floor(FloorNavState.currentFloorId.value ?: "floor_ground")) { popUpTo(Routes.HOME) } },
                 onAlertsClick = { navController.navigate(Routes.ALERTS) },
                 onUsageClick = { navController.navigate(Routes.USAGE) },
                 onSettingsClick = { navController.navigate(Routes.SETTINGS) }
@@ -104,7 +103,7 @@ fun NavGraph(navController: NavHostController) {
         composable(Routes.ALERTS) {
             AlertsScreen(
                 onHomeClick = { navController.navigate(Routes.HOME) { popUpTo(Routes.HOME) { inclusive = true } } },
-                onFloorClick = { navController.navigate(Routes.floor("floor_ground")) { popUpTo(Routes.HOME) } },
+                onFloorClick = { navController.navigate(Routes.floor(FloorNavState.currentFloorId.value ?: "floor_ground")) { popUpTo(Routes.HOME) } },
                 onUsageClick = { navController.navigate(Routes.USAGE) },
                 onSettingsClick = { navController.navigate(Routes.SETTINGS) }
             )
@@ -112,7 +111,7 @@ fun NavGraph(navController: NavHostController) {
         composable(Routes.USAGE) {
             ReportsScreen(
                 onHomeClick = { navController.navigate(Routes.HOME) { popUpTo(Routes.HOME) { inclusive = true } } },
-                onFloorClick = { navController.navigate(Routes.floor("floor_ground")) { popUpTo(Routes.HOME) } },
+                onFloorClick = { navController.navigate(Routes.floor(FloorNavState.currentFloorId.value ?: "floor_ground")) { popUpTo(Routes.HOME) } },
                 onAlertsClick = { navController.navigate(Routes.ALERTS) },
                 onSettingsClick = { navController.navigate(Routes.SETTINGS) }
             )
@@ -120,7 +119,7 @@ fun NavGraph(navController: NavHostController) {
         composable(Routes.SETTINGS) {
             SettingsScreen(
                 onHomeClick = { navController.navigate(Routes.HOME) { popUpTo(Routes.HOME) { inclusive = true } } },
-                onFloorClick = { navController.navigate(Routes.floor("floor_ground")) { popUpTo(Routes.HOME) } },
+                onFloorClick = { navController.navigate(Routes.floor(FloorNavState.currentFloorId.value ?: "floor_ground")) { popUpTo(Routes.HOME) } },
                 onAlertsClick = { navController.navigate(Routes.ALERTS) },
                 onUsageClick = { navController.navigate(Routes.USAGE) },
                 onAccountSettings = { navController.navigate(Routes.ACCOUNT_SETTINGS) },

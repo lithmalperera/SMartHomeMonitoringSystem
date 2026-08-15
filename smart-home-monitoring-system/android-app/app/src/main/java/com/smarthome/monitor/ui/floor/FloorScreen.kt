@@ -60,6 +60,7 @@ import com.smarthome.monitor.ui.components.BottomNavBar
 import com.smarthome.monitor.ui.components.BottomNavItem
 import com.smarthome.monitor.ui.components.DeviceIcon
 import com.smarthome.monitor.ui.components.LoadingBox
+import com.smarthome.monitor.ui.navigation.FloorNavState
 
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
@@ -76,7 +77,10 @@ fun FloorScreen(
     onSettingsClick: () -> Unit,
     viewModel: FloorViewModel = hiltViewModel()
 ) {
-    LaunchedEffect(floorId) { viewModel.loadFloor(floorId) }
+    LaunchedEffect(floorId) {
+        FloorNavState.currentFloorId.value = floorId
+        viewModel.loadFloor(floorId)
+    }
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
@@ -86,7 +90,10 @@ fun FloorScreen(
                 floors = uiState.floors,
                 currentFloorId = floorId,
                 alertBadge = uiState.alertsCount > 0,
-                onSelectFloor = onSelectFloor,
+                onSelectFloor = { id ->
+                    FloorNavState.currentFloorId.value = id
+                    onSelectFloor(id)
+                },
                 onNotificationsClick = onAlertsClick
             )
         },
@@ -245,7 +252,7 @@ private fun FloorTopBar(
 
 @Composable
 private fun FloorCanvas(
-    imageUrl: String?,
+    imageUrl: Any?,
     devices: List<Device>,
     gridColumns: Int,
     gridRows: Int,
@@ -273,7 +280,7 @@ private fun FloorCanvas(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (!imageUrl.isNullOrBlank()) {
+                if (imageUrl != null) {
                     AsyncImage(
                         model = imageUrl,
                         contentDescription = "Floor plan",

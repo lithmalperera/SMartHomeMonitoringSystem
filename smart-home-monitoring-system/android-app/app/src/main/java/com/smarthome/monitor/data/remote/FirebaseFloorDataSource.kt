@@ -41,7 +41,7 @@ class FirebaseFloorDataSource @Inject constructor(
         awaitClose { ref.removeEventListener(listener) }
     }
 
-    suspend fun addFloor(name: String, order: Int, gridColumns: Int, gridRows: Int, imageUrl: String?) {
+    suspend fun addFloor(name: String, order: Int, gridColumns: Int, gridRows: Int, imageUrl: String?): String {
         val ref = db.getReference(Constants.DbPaths.floors()).push()
         val floorId = ref.key ?: throw IllegalStateException("Could not generate floor ID")
         val floor = Floor(
@@ -53,5 +53,6 @@ class FirebaseFloorDataSource @Inject constructor(
             imageUrl = imageUrl
         )
         ref.setValue(floor).await()
+        return floorId
     }
 }
